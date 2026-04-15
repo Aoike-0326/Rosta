@@ -3,6 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <title>投票システム</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+
 <script src="https://unpkg.com/html5-qrcode"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
@@ -17,28 +21,33 @@ body {
   justify-content: center;
   align-items: center;
   font-family: sans-serif;
-  background: linear-gradient(135deg,#667eea,#764ba2);
+  background: #111;
   color: white;
 }
 
 .container {
-  width: 900px;
+  width: 1000px;
   max-width: 95%;
 }
 
 .card {
-  background: rgba(255,255,255,0.1);
-  padding: 20px;
-  border-radius: 15px;
+  background: #1a1a1a;
+  padding: 30px;
+  border-radius: 20px;
   margin: auto;
-  max-width: 600px;
+  max-width: 700px;
+  box-shadow: 0 0 20px rgba(255,255,255,0.1);
+}
+
+h2 {
+  font-size: 36px;
 }
 
 button {
-  font-size: 22px;
-  padding: 15px;
-  margin: 10px;
-  border-radius: 12px;
+  font-size: 28px;
+  padding: 20px;
+  margin: 15px;
+  border-radius: 15px;
   border: none;
   transition: 0.2s;
 }
@@ -47,13 +56,18 @@ button:active {
   transform: scale(0.95);
 }
 
-.agree { background: #ff4b5c; }
-.disagree { background: #4b7bff; }
-.absent { background: #888; }
+.agree { background: white; color: black; }
+.disagree { background: #333; }
+.absent { background: #555; }
 
 #studentId {
-  font-size: 28px;
+  font-size: 48px;
   font-weight: bold;
+  margin: 20px 0;
+}
+
+#progress {
+  font-size: 28px;
 }
 </style>
 </head>
@@ -74,7 +88,7 @@ button:active {
 <!-- コード入力 -->
 <div id="codeInput" class="card" style="display:none;">
 <h2>投票コード入力</h2>
-<input id="voteCode" placeholder="例:0248" style="font-size:20px;">
+<input id="voteCode" placeholder="例:0248" style="font-size:24px;">
 <br><br>
 <button onclick="startVoting()">開始</button>
 </div>
@@ -105,19 +119,32 @@ button:active {
 </div>
 
 <script>
+// PWA
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js');
+}
+
 let cls="", start=1, end=0;
 let current, votes=[];
 let agree=0, disagree=0, absent=0;
 
-let scanner;
+let html5QrCode;
 
-// QR開始
+// QR起動（軽量版）
 function startQR(){
-  scanner = new Html5QrcodeScanner("reader",{fps:10,qrbox:250});
-  scanner.render(onScanSuccess);
+  html5QrCode = new Html5Qrcode("reader");
+
+  html5QrCode.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: 200 },
+    (decodedText) => {
+      onScanSuccess(decodedText);
+      html5QrCode.stop();
+    }
+  );
 }
 
-// QR読み取り成功
+// QR読み取り
 function onScanSuccess(text){
   let data=JSON.parse(text);
   cls=data.class;
@@ -126,10 +153,6 @@ function onScanSuccess(text){
 
   document.getElementById("setupText").innerText =
     `${cls} ${start}〜${end}番`;
-
-  if(scanner){
-    scanner.clear();
-  }
 }
 
 // 設定確定
@@ -137,6 +160,13 @@ function confirmSetup(){
   current=start;
   document.getElementById("setup").style.display="none";
   document.getElementById("codeInput").style.display="block";
+}
+
+// 学籍番号生成
+function getStudentId(){
+  let [grade, clsNum] = cls.split("-");
+  let num = String(current).padStart(2,"0");
+  return `${grade}${clsNum}${num}`;
 }
 
 // 投票開始
@@ -153,12 +183,12 @@ function startVoting(){
   update();
 }
 
-// 表示更新
+// 更新
 function update(){
   document.getElementById("progress").innerText =
     `${current} / ${end}`;
   document.getElementById("studentId").innerText =
-    `${cls}${current}`;
+    getStudentId();
 }
 
 // 投票
