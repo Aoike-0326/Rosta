@@ -78,11 +78,18 @@ button:active {
 <!-- 初期設定 -->
 <div id="setup" class="card">
 <h2>QR読み取り</h2>
+
 <div id="reader" style="width:300px;margin:auto;"></div>
 <br>
+
 <button onclick="startQR()">QR開始</button>
+
 <p id="setupText"></p>
-<button onclick="confirmSetup()">次へ</button>
+
+<!-- 最初は非表示 -->
+<button id="nextBtn" onclick="confirmSetup()" style="display:none;">
+次へ
+</button>
 </div>
 
 <!-- コード入力 -->
@@ -151,8 +158,16 @@ function onScanSuccess(text){
   start=data.start;
   end=data.end;
 
-  document.getElementById("setupText").innerText =
-    `${cls} ${start}〜${end}番`;
+  document.getElementById("setupText").innerHTML =
+    `
+    <b>読み取り成功！</b><br><br>
+    クラス：${cls}<br>
+    範囲：${start}〜${end}番<br><br>
+    この内容でOK？
+    `;
+
+  // 次へボタン表示
+  document.getElementById("nextBtn").style.display = "inline-block";
 }
 
 // 設定確定
