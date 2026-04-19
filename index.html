@@ -264,12 +264,23 @@ function confirmSetup(){
 
 // 子機2QR生成（軽量）
 function generateChild2QR(code){
-  let data = `${cls}|${ranges[1].start}|${ranges[1].end}|${code}`;
+
+  // ★安全チェック
+  if(!ranges || ranges.length < 2){
+    alert("子機2の範囲が見つかりません");
+    return;
+  }
+
+  let start2 = ranges[1].start;
+  let end2 = ranges[1].end;
+
+  let data = `${cls}|${start2}|${end2}|${code}`;
 
   document.getElementById("child2QR").innerHTML = "";
   new QRCode(document.getElementById("child2QR"), data);
 
   document.getElementById("child2Area").style.display="block";
+}
 }
 
 // 投票開始（子機1）
