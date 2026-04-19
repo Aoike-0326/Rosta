@@ -5,6 +5,7 @@
 <title>投票システム</title>
 
 <script src="https://unpkg.com/html5-qrcode"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <style>
 html, body {
@@ -21,14 +22,12 @@ body {
   align-items: center;
 }
 
-/* 全体中央 */
 .container {
   width: 100%;
   max-width: 1200px;
   height: 95%;
 }
 
-/* 共通カード */
 .card {
   width: 100%;
   height: 100%;
@@ -38,7 +37,7 @@ body {
 
 /* QR */
 .big-text {
-  font-size: 50px;
+  font-size: 60px;
   font-weight: bold;
 }
 
@@ -48,85 +47,65 @@ body {
   margin: 20px;
 }
 
-/* 投票画面 */
+/* 投票 */
 #voteArea {
   display: flex;
   flex-direction: column;
   height: 100%;
 }
 
-/* 上 */
-.top-area {
-  text-align: center;
-}
-
-#progress {
-  font-size: 32px;
-}
-
-#studentId {
-  font-size: 64px;
-  font-weight: bold;
-}
-
-/* メイン投票 */
 .vote-main {
   flex: 1;
   display: flex;
 }
 
-/* 半分ボタン */
 .vote-half {
   flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   font-size: 70px;
   font-weight: bold;
   border: none;
   transition: 0.1s;
 }
 
-/* 押した感 */
 .vote-half:active {
   transform: scale(0.95);
   filter: brightness(0.8);
 }
 
-.agree {
-  background: #ff3b3b;
-}
+.agree { background:#ff3b3b; }
+.disagree { background:#2f6bff; }
 
-.disagree {
-  background: #2f6bff;
-}
-
-/* 欠席 */
 .absent {
-  width: 100%;
-  height: 130px;
-  font-size: 42px;
-  background: #444;
-  color: white;
-  border: none;
-  transition: 0.1s;
+  width:100%;
+  height:130px;
+  font-size:42px;
+  background:#444;
+  color:white;
+  border:none;
 }
 
 .absent:active {
   transform: scale(0.95);
-  filter: brightness(0.8);
 }
 
-/* 戻る（強化） */
+#studentId {
+  font-size:64px;
+  font-weight:bold;
+}
+
+#progress {
+  font-size:32px;
+}
+
 .back-btn {
-  position: absolute;
-  top: 15px;
-  left: 15px;
-  font-size: 28px;
-  padding: 15px 20px;
-  background: #ffcc00;
-  color: black;
-  font-weight: bold;
+  position:absolute;
+  top:15px;
+  left:15px;
+  font-size:28px;
+  padding:15px;
+  background:#ffcc00;
+  color:black;
+  font-weight:bold;
 }
 </style>
 </head>
@@ -144,11 +123,10 @@ body {
 <button id="qrStartBtn" class="qr-btn" onclick="startQR()">QR開始</button>
 
 <div id="afterScan" style="display:none;">
-  <div class="big-text" style="color:#0f0;">
-    読み取り成功
-  </div>
-
+  <div class="big-text" style="color:#0f0;">読み取り成功</div>
   <div id="scanResult" style="font-size:32px;margin-top:20px;"></div>
+
+  <div id="child2QR"></div>
 
   <button class="qr-btn" onclick="confirmSetup()">次へ</button>
   <button class="qr-btn" onclick="resetQR()">再スキャン</button>
@@ -169,24 +147,15 @@ body {
 
 <button class="back-btn" onclick="goBack()">戻る</button>
 
-<div class="top-area">
-  <div id="progress"></div>
-  <div id="studentId"></div>
-</div>
+<div id="progress"></div>
+<div id="studentId"></div>
 
 <div class="vote-main">
-  <button class="vote-half agree" onclick="vote('賛成')">
-    賛成
-  </button>
-
-  <button class="vote-half disagree" onclick="vote('反対')">
-    反対
-  </button>
+  <button class="vote-half agree" onclick="vote('賛成')">賛成</button>
+  <button class="vote-half disagree" onclick="vote('反対')">反対</button>
 </div>
 
-<button class="absent" onclick="vote('欠席')">
-  欠席
-</button>
+<button class="absent" onclick="vote('欠席')">欠席</button>
 
 </div>
 
@@ -194,14 +163,16 @@ body {
 <div id="resultArea" class="card" style="display:none;">
 <h2>結果</h2>
 <p id="resultText"></p>
+<div id="qrcode"></div>
 </div>
 
 </div>
 
 <script>
-let cls="", start=1, end=0;
+let cls="", start=1, end=0, total=0, role="";
 let current, votes=[];
 let agree=0, disagree=0, absent=0;
+let ranges=[];
 let html5QrCode;
 
 // QR開始
@@ -209,28 +180,68 @@ function startQR(){
   document.getElementById("qrStartBtn").style.display="none";
 
   html5QrCode = new Html5Qrcode("reader");
-
   html5QrCode.start(
     { facingMode: "environment" },
     { fps: 10, qrbox: 250 },
-    (decodedText) => {
-      onScanSuccess(decodedText);
+    (text)=>{
+      onScanSuccess(text);
       html5QrCode.stop();
     }
   );
 }
 
-// QR成功
+// QR読み取り
 function onScanSuccess(text){
-  let data=JSON.parse(text);
-  cls=data.class;
-  start=data.start;
-  end=data.end;
+  let data = JSON.parse(text);
+
+  cls = data.class;
+  total = data.total || 0;
+  ranges = data.ranges || [];
+  role = data.role || "child1";
+
+  if(ranges.length){
+    let r = ranges[0];
+    start = r.start;
+    end = r.end;
+    role = r.role;
+  } else {
+    start = data.start;
+    end = data.end;
+  }
 
   document.getElementById("afterScan").style.display="block";
 
-  document.getElementById("scanResult").innerText =
-    `${cls} ${start}〜${end}番`;
+  // 子機2警告
+  if(role==="child2"){
+    document.getElementById("scanResult").innerHTML =
+      `<div style="font-size:60px;color:red;">
+      ${start}番から投票です
+      </div>
+      <div>${cls} ${start}〜${end}</div>`;
+  } else {
+    document.getElementById("scanResult").innerText =
+      `${cls} ${start}〜${end}`;
+  }
+
+  // 子機1ならQR生成
+  if(role==="child1" && ranges.length>1){
+    generateChild2QR();
+  }
+}
+
+// 子機2QR生成
+function generateChild2QR(){
+  let data = {
+    class: cls,
+    total: total,
+    start: ranges[1].start,
+    end: ranges[1].end,
+    role: "child2"
+  };
+
+  let qrText = JSON.stringify(data);
+
+  new QRCode(document.getElementById("child2QR"), qrText);
 }
 
 // 再スキャン
@@ -239,9 +250,14 @@ function resetQR(){
   document.getElementById("qrStartBtn").style.display="inline-block";
 }
 
-// 設定
+// 次へ
 function confirmSetup(){
+  if(role==="child2"){
+    if(!confirm(`${start}番からでOK？`)) return;
+  }
+
   current=start;
+
   document.getElementById("setup").style.display="none";
   document.getElementById("codeInput").style.display="block";
 }
@@ -252,7 +268,7 @@ function getStudentId(){
   return `${g}${c}${String(current).padStart(2,"0")}`;
 }
 
-// 開始
+// 投票開始
 function startVoting(){
   let code=document.getElementById("voteCode").value;
 
@@ -313,6 +329,10 @@ function showResult(){
 
   document.getElementById("resultText").innerText =
     `賛成:${agree} 反対:${disagree} 欠席:${absent}`;
+
+  // QR出力（バックアップ）
+  let code = `${cls}|${agree}|${disagree}|${absent}`;
+  new QRCode(document.getElementById("qrcode"), code);
 }
 </script>
 
