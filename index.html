@@ -5,7 +5,6 @@
 <title>投票システム</title>
 
 <script src="https://unpkg.com/html5-qrcode"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <style>
 html, body {
@@ -17,32 +16,30 @@ body {
   font-family: sans-serif;
   background: #111;
   color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-/* 共通 */
+/* 全体中央 */
 .container {
   width: 100%;
-  height: 100%;
+  max-width: 1200px;
+  height: 95%;
 }
 
-/* カード */
+/* 共通カード */
 .card {
   width: 100%;
   height: 100%;
-  padding: 40px;
-  box-sizing: border-box;
+  text-align: center;
   position: relative;
 }
 
-/* QR画面 */
-#setup {
-  text-align: center;
-}
-
+/* QR */
 .big-text {
-  font-size: 48px;
+  font-size: 50px;
   font-weight: bold;
-  margin-top: 20px;
 }
 
 .qr-btn {
@@ -58,6 +55,7 @@ body {
   height: 100%;
 }
 
+/* 上 */
 .top-area {
   text-align: center;
 }
@@ -71,21 +69,28 @@ body {
   font-weight: bold;
 }
 
-/* ボタンエリア */
+/* メイン投票 */
 .vote-main {
   flex: 1;
   display: flex;
 }
 
-/* 左右 */
+/* 半分ボタン */
 .vote-half {
   flex: 1;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 64px;
+  font-size: 70px;
   font-weight: bold;
   border: none;
+  transition: 0.1s;
+}
+
+/* 押した感 */
+.vote-half:active {
+  transform: scale(0.95);
+  filter: brightness(0.8);
 }
 
 .agree {
@@ -99,20 +104,29 @@ body {
 /* 欠席 */
 .absent {
   width: 100%;
-  height: 120px;
-  font-size: 40px;
+  height: 130px;
+  font-size: 42px;
   background: #444;
   color: white;
+  border: none;
+  transition: 0.1s;
 }
 
-/* 戻る */
+.absent:active {
+  transform: scale(0.95);
+  filter: brightness(0.8);
+}
+
+/* 戻る（強化） */
 .back-btn {
   position: absolute;
   top: 15px;
   left: 15px;
-  font-size: 24px;
-  padding: 10px 15px;
-  background: #333;
+  font-size: 28px;
+  padding: 15px 20px;
+  background: #ffcc00;
+  color: black;
+  font-weight: bold;
 }
 </style>
 </head>
@@ -128,8 +142,6 @@ body {
 <div id="reader" style="width:300px;margin:auto;"></div>
 
 <button id="qrStartBtn" class="qr-btn" onclick="startQR()">QR開始</button>
-
-<div id="setupText"></div>
 
 <div id="afterScan" style="display:none;">
   <div class="big-text" style="color:#0f0;">
@@ -182,7 +194,6 @@ body {
 <div id="resultArea" class="card" style="display:none;">
 <h2>結果</h2>
 <p id="resultText"></p>
-<div id="qrcode"></div>
 </div>
 
 </div>
@@ -193,8 +204,10 @@ let current, votes=[];
 let agree=0, disagree=0, absent=0;
 let html5QrCode;
 
-// QR
+// QR開始
 function startQR(){
+  document.getElementById("qrStartBtn").style.display="none";
+
   html5QrCode = new Html5Qrcode("reader");
 
   html5QrCode.start(
@@ -214,7 +227,6 @@ function onScanSuccess(text){
   start=data.start;
   end=data.end;
 
-  document.getElementById("qrStartBtn").style.display="none";
   document.getElementById("afterScan").style.display="block";
 
   document.getElementById("scanResult").innerText =
