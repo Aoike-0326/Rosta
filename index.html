@@ -14,57 +14,76 @@ html, body {
 }
 
 body {
-  display: flex;
-  justify-content: center;
-  align-items: center;
   font-family: sans-serif;
   background: #111;
   color: white;
 }
 
+/* 共通 */
 .container {
-  width: 1200px;
-  max-width: 95%;
+  width: 100%;
+  height: 100%;
 }
 
 /* カード */
 .card {
-  background: #1a1a1a;
+  width: 100%;
+  height: 100%;
   padding: 40px;
-  border-radius: 20px;
-  margin: auto;
-  max-width: 900px;
+  box-sizing: border-box;
   position: relative;
 }
 
-/* 戻る */
-.back-btn {
-  position: absolute;
-  top: 15px;
-  left: 15px;
-  font-size: 22px;
-  padding: 12px 18px;
-  background: #333;
-  color: white;
+/* QR画面 */
+#setup {
+  text-align: center;
 }
 
-/* 見出し */
-h2 {
-  font-size: 40px;
+.big-text {
+  font-size: 48px;
+  font-weight: bold;
+  margin-top: 20px;
 }
 
-/* 投票ボタン */
-.vote-row {
+.qr-btn {
+  font-size: 32px;
+  padding: 20px 40px;
+  margin: 20px;
+}
+
+/* 投票画面 */
+#voteArea {
   display: flex;
-  justify-content: space-around;
-  margin-top: 40px;
+  flex-direction: column;
+  height: 100%;
 }
 
-.circle-btn {
-  width: 260px;
-  height: 260px;
-  border-radius: 50%;
-  font-size: 42px;
+.top-area {
+  text-align: center;
+}
+
+#progress {
+  font-size: 32px;
+}
+
+#studentId {
+  font-size: 64px;
+  font-weight: bold;
+}
+
+/* ボタンエリア */
+.vote-main {
+  flex: 1;
+  display: flex;
+}
+
+/* 左右 */
+.vote-half {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 64px;
   font-weight: bold;
   border: none;
 }
@@ -79,32 +98,21 @@ h2 {
 
 /* 欠席 */
 .absent {
-  width: 85%;
+  width: 100%;
+  height: 120px;
   font-size: 40px;
-  padding: 35px;
-  margin-top: 50px;
   background: #444;
   color: white;
 }
 
-/* 学籍番号 */
-#studentId {
-  font-size: 64px;
-  font-weight: bold;
-  text-align: center;
-  margin: 20px 0;
-}
-
-#progress {
-  text-align: center;
-  font-size: 32px;
-}
-
-/* QRボタン */
-.qr-btn {
-  font-size: 26px;
-  padding: 15px 25px;
-  margin: 10px;
+/* 戻る */
+.back-btn {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  font-size: 24px;
+  padding: 10px 15px;
+  background: #333;
 }
 </style>
 </head>
@@ -112,28 +120,36 @@ h2 {
 <body>
 <div class="container">
 
-<!-- 初期 -->
+<!-- QR -->
 <div id="setup" class="card">
+
 <h2>QR読み取り</h2>
 
-<div id="reader" style="width:320px;margin:auto;"></div>
-
-<br>
+<div id="reader" style="width:300px;margin:auto;"></div>
 
 <button id="qrStartBtn" class="qr-btn" onclick="startQR()">QR開始</button>
-<button id="rescanBtn" class="qr-btn" onclick="resetQR()" style="display:none;">再スキャン</button>
 
-<p id="setupText"></p>
+<div id="setupText"></div>
 
-<button id="nextBtn" onclick="confirmSetup()" style="display:none;">次へ</button>
+<div id="afterScan" style="display:none;">
+  <div class="big-text" style="color:#0f0;">
+    読み取り成功
+  </div>
+
+  <div id="scanResult" style="font-size:32px;margin-top:20px;"></div>
+
+  <button class="qr-btn" onclick="confirmSetup()">次へ</button>
+  <button class="qr-btn" onclick="resetQR()">再スキャン</button>
+</div>
+
 </div>
 
 <!-- コード -->
 <div id="codeInput" class="card" style="display:none;">
 <h2>投票コード入力</h2>
-<input id="voteCode" style="font-size:28px;">
+<input id="voteCode" style="font-size:32px;">
 <br><br>
-<button onclick="startVoting()">開始</button>
+<button class="qr-btn" onclick="startVoting()">開始</button>
 </div>
 
 <!-- 投票 -->
@@ -141,15 +157,24 @@ h2 {
 
 <button class="back-btn" onclick="goBack()">戻る</button>
 
-<h2 id="progress"></h2>
-<h3 id="studentId"></h3>
-
-<div class="vote-row">
-  <button class="circle-btn agree" onclick="vote('賛成')">賛成</button>
-  <button class="circle-btn disagree" onclick="vote('反対')">反対</button>
+<div class="top-area">
+  <div id="progress"></div>
+  <div id="studentId"></div>
 </div>
 
-<button class="absent" onclick="vote('欠席')">欠席</button>
+<div class="vote-main">
+  <button class="vote-half agree" onclick="vote('賛成')">
+    賛成
+  </button>
+
+  <button class="vote-half disagree" onclick="vote('反対')">
+    反対
+  </button>
+</div>
+
+<button class="absent" onclick="vote('欠席')">
+  欠席
+</button>
 
 </div>
 
@@ -157,7 +182,6 @@ h2 {
 <div id="resultArea" class="card" style="display:none;">
 <h2>結果</h2>
 <p id="resultText"></p>
-<button onclick="submitData()">送信</button>
 <div id="qrcode"></div>
 </div>
 
@@ -167,10 +191,9 @@ h2 {
 let cls="", start=1, end=0;
 let current, votes=[];
 let agree=0, disagree=0, absent=0;
-
 let html5QrCode;
 
-// QR開始
+// QR
 function startQR(){
   html5QrCode = new Html5Qrcode("reader");
 
@@ -184,14 +207,6 @@ function startQR(){
   );
 }
 
-// 再スキャン
-function resetQR(){
-  document.getElementById("setupText").innerText="";
-  document.getElementById("nextBtn").style.display="none";
-  document.getElementById("rescanBtn").style.display="none";
-  document.getElementById("qrStartBtn").style.display="inline-block";
-}
-
 // QR成功
 function onScanSuccess(text){
   let data=JSON.parse(text);
@@ -199,16 +214,17 @@ function onScanSuccess(text){
   start=data.start;
   end=data.end;
 
-  document.getElementById("setupText").innerHTML =
-    `読み取り成功<br>${cls} ${start}〜${end}`;
-
-  document.getElementById("nextBtn").style.display="inline-block";
-
-  // QR開始ボタン消す
   document.getElementById("qrStartBtn").style.display="none";
+  document.getElementById("afterScan").style.display="block";
 
-  // 再スキャン出す
-  document.getElementById("rescanBtn").style.display="inline-block";
+  document.getElementById("scanResult").innerText =
+    `${cls} ${start}〜${end}番`;
+}
+
+// 再スキャン
+function resetQR(){
+  document.getElementById("afterScan").style.display="none";
+  document.getElementById("qrStartBtn").style.display="inline-block";
 }
 
 // 設定
@@ -234,7 +250,7 @@ function startVoting(){
   }
 
   document.getElementById("codeInput").style.display="none";
-  document.getElementById("voteArea").style.display="block";
+  document.getElementById("voteArea").style.display="flex";
   update();
 }
 
@@ -285,22 +301,6 @@ function showResult(){
 
   document.getElementById("resultText").innerText =
     `賛成:${agree} 反対:${disagree} 欠席:${absent}`;
-}
-
-// 送信
-function submitData(){
-  fetch("URL",{
-    method:"POST",
-    body:JSON.stringify({
-      class:cls,agree,disagree,absent
-    })
-  })
-  .then(()=>alert("送信成功"))
-  .catch(()=>{
-    alert("失敗、QRで提出");
-    new QRCode(document.getElementById("qrcode"),
-      `${cls},${agree},${disagree},${absent}`);
-  });
 }
 </script>
 
