@@ -124,24 +124,6 @@ body {
   <div class="big-text" style="color:#0f0;">読み取り成功</div>
   <div id="scanResult" style="font-size:32px;margin-top:20px;"></div>
 
-  <!-- 子機2QR -->
-  <div style="margin-top:30px;">
-    <div style="display:flex; justify-content:center; align-items:center; gap:30px;">
-
-      <div id="child2QR"></div>
-
-      <div style="text-align:left;">
-        <div style="font-size:28px; font-weight:bold;">
-          評議委員別端末用QR
-        </div>
-        <div style="font-size:18px; margin-top:10px;">
-          もう1人の評議委員が同じサイトでこのQRを読み込んでください
-        </div>
-      </div>
-
-    </div>
-  </div>
-
   <button class="qr-btn" onclick="confirmSetup()">次へ</button>
   <button class="qr-btn" onclick="resetQR()">再スキャン</button>
 </div>
@@ -154,6 +136,25 @@ body {
 <input id="voteCode" style="font-size:32px;">
 <br><br>
 <button class="qr-btn" onclick="startVoting()">開始</button>
+
+<!-- 子機2QR（最初は非表示） -->
+<div id="child2Area" style="display:none; margin-top:30px;">
+  <div style="display:flex; justify-content:center; align-items:center; gap:30px;">
+
+    <div id="child2QR"></div>
+
+    <div style="text-align:left;">
+      <div style="font-size:28px; font-weight:bold;">
+        評議委員別端末用QR
+      </div>
+      <div style="font-size:18px; margin-top:10px;">
+        もう1人の評議委員が同じサイトでこのQRを読み込んでください
+      </div>
+    </div>
+
+  </div>
+</div>
+
 </div>
 
 <!-- 投票 -->
@@ -240,29 +241,6 @@ function onScanSuccess(text){
     document.getElementById("scanResult").innerText =
       `${cls} ${start}〜${end}`;
   }
-
-  if(role==="child1" && ranges.length>1){
-    generateChild2QR();
-  }
-}
-
-// 子機2QR生成
-function generateChild2QR(){
-  let code = document.getElementById("voteCode").value;
-
-  let data = {
-    class: cls,
-    total: total,
-    start: ranges[1].start,
-    end: ranges[1].end,
-    role: "child2",
-    voteCode: code
-  };
-
-  let qrText = JSON.stringify(data);
-
-  document.getElementById("child2QR").innerHTML = "";
-  new QRCode(document.getElementById("child2QR"), qrText);
 }
 
 // 再スキャン
@@ -287,6 +265,29 @@ function confirmSetup(){
 
   document.getElementById("setup").style.display="none";
   document.getElementById("codeInput").style.display="block";
+}
+
+// 子機2QR生成（ここが重要）
+function generateChild2QR(code){
+
+  if(!ranges.length) return;
+
+  let data = {
+    class: cls,
+    total: total,
+    start: ranges[1].start,
+    end: ranges[1].end,
+    role: "child2",
+    voteCode: code
+  };
+
+  let qrText = JSON.stringify(data);
+
+  document.getElementById("child2QR").innerHTML = "";
+  new QRCode(document.getElementById("child2QR"), qrText);
+
+  // 表示ON
+  document.getElementById("child2Area").style.display="block";
 }
 
 // 直接開始（子機2）
@@ -314,8 +315,10 @@ function startVoting(){
     return;
   }
 
-  // QR生成（ここ重要）
-  generateChild2QR();
+  // ★ここでQR生成（修正ポイント）
+  if(role==="child1"){
+    generateChild2QR(code);
+  }
 
   document.getElementById("codeInput").style.display="none";
   document.getElementById("voteArea").style.display="flex";
