@@ -175,12 +175,12 @@ body {
 <!-- 結果 -->
 <div id="resultArea" class="card" style="display:none;">
 <h2>結果</h2>
+
 <p id="resultText"></p>
 
-<button onclick="startMergeQR()">子機2読み取り</button>
+<button id="mergeBtn" onclick="startMergeQR()">子機2読み取り</button>
 <div id="mergeReader" style="width:300px;margin:auto;"></div>
 
-<div id="qrcode"></div>
 </div>
 
 </div>
@@ -210,21 +210,30 @@ function startQR(){
 
 // QR読み取り
 function onScanSuccess(text){
-  let data = JSON.parse(text);
 
-  cls = data.class;
-  total = data.total || 0;
-  ranges = data.ranges || [];
-  role = data.role || "child1";
+  // 子機2QR（軽量）
+  if(text.includes("|")){
+    let parts = text.split("|");
 
-  if(data.voteCode){
-    voteCodeGlobal = data.voteCode;
+    cls = parts[0];
+    start = Number(parts[1]);
+    end = Number(parts[2]);
+    voteCodeGlobal = parts[3];
+    role = "child2";
+
+  } else {
+    let data = JSON.parse(text);
+
+    cls = data.class;
+    total = data.total || 0;
+    ranges = data.ranges || [];
+    role = data.role || "child1";
+
+    let r = ranges[0];
+    start = r.start;
+    end = r.end;
+    role = r.role;
   }
-
-  let r = ranges[0];
-  start = r.start;
-  end = r.end;
-  role = r.role;
 
   document.getElementById("afterScan").style.display="block";
 
@@ -253,25 +262,12 @@ function confirmSetup(){
   document.getElementById("codeInput").style.display="block";
 }
 
-// 子機2QR生成
+// 子機2QR生成（軽量）
 function generateChild2QR(code){
-  let data = {
-    class: cls,
-    total: total,
-    ranges: [
-      {
-        start: ranges[1].start,
-        end: ranges[1].end,
-        role: "child2"
-      }
-    ],
-    voteCode: code
-  };
-
-  let qrText = JSON.stringify(data);
+  let data = `${cls}|${ranges[1].start}|${ranges[1].end}|${code}`;
 
   document.getElementById("child2QR").innerHTML = "";
-  new QRCode(document.getElementById("child2QR"), qrText);
+  new QRCode(document.getElementById("child2QR"), data);
 
   document.getElementById("child2Area").style.display="block";
 }
@@ -361,13 +357,18 @@ function showResult(){
   document.getElementById("voteArea").style.display="none";
   document.getElementById("resultArea").style.display="block";
 
-  document.getElementById("resultText").innerText =
-    `賛成:${agree} 反対:${disagree} 欠席:${absent}`;
+  // 子機2はボタン消す
+  if(role==="child2"){
+    document.getElementById("mergeBtn").style.display="none";
+  }
 
-  let code = `${cls}|${voteCodeGlobal}|${agree}|${disagree}|${absent}`;
-
-  document.getElementById("qrcode").innerHTML = "";
-  new QRCode(document.getElementById("qrcode"), code);
+  document.getElementById("resultText").innerHTML =
+    `<div style="font-size:60px;font-weight:bold;">合計</div>
+     <div style="font-size:50px;">
+     賛成:${agree}<br>
+     反対:${disagree}<br>
+     欠席:${absent}
+     </div>`;
 }
 
 // 合体QR開始
@@ -409,8 +410,13 @@ function mergeData(text){
   disagree += Number(d);
   absent += Number(ab);
 
-  document.getElementById("resultText").innerText =
-    `合計\n賛成:${agree} 反対:${disagree} 欠席:${absent}`;
+  document.getElementById("resultText").innerHTML =
+    `<div style="font-size:60px;font-weight:bold;">合計</div>
+     <div style="font-size:50px;">
+     賛成:${agree}<br>
+     反対:${disagree}<br>
+     欠席:${absent}
+     </div>`;
 
   alert("合体成功！");
 }
