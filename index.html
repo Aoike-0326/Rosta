@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Rösta│ルスタ3</title>
+<title>Rösta│ルスタ4</title>
 
 <script src="https://unpkg.com/html5-qrcode"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -211,17 +211,8 @@ function startQR(){
 // QR読み取り
 function onScanSuccess(text){
 
-  // 子機2QR
-  if(text.includes("|")){
-    let parts = text.split("|");
-
-    cls = parts[0];
-    start = Number(parts[1]);
-    end = Number(parts[2]);
-    voteCodeGlobal = parts[3];
-    role = "child2";
-
-  } else {
+  try {
+    // JSONならこっち（親QR）
     let data = JSON.parse(text);
 
     cls = data.class;
@@ -231,7 +222,43 @@ function onScanSuccess(text){
     start = r.start;
     end = r.end;
     role = r.role;
+
+  } catch(e) {
+    // JSONじゃない＝子機2QR
+    let parts = text.split("|");
+
+    if(parts.length === 4){
+      // 子機2用QR
+      cls = parts[0];
+      start = Number(parts[1]);
+      end = Number(parts[2]);
+      voteCodeGlobal = parts[3];
+      role = "child2";
+
+    } else if(parts.length === 5){
+      // 結果QR（これはここでは使わない）
+      alert("このQRは結果データです（子機1で読み取ってください）");
+      return;
+
+    } else {
+      alert("QR形式エラー");
+      return;
+    }
   }
+
+  document.getElementById("afterScan").style.display="block";
+
+  if(role==="child2"){
+    document.getElementById("scanResult").innerHTML =
+      `<div style="font-size:60px;color:red;">
+      ${start}番から投票です
+      </div>
+      <div>${cls} ${start}〜${end}</div>`;
+  } else {
+    document.getElementById("scanResult").innerText =
+      `${cls} ${start}〜${end}`;
+  }
+}
 
   document.getElementById("afterScan").style.display="block";
 
@@ -368,7 +395,7 @@ function showResult(){
   document.getElementById("voteArea").style.display="none";
   document.getElementById("resultArea").style.display="block";
 
-  // 合計表示（デカく）
+  // 合計表示
   document.getElementById("resultText").innerHTML =
     `<div style="font-size:60px;font-weight:bold;">合計</div>
      <div style="font-size:50px;">
@@ -377,22 +404,48 @@ function showResult(){
      欠席:${absent}
      </div>`;
 
-  // ★子機2だけQR出す
+  // 子機2だけQR出す
   if(role === "child2"){
 
     let data = `${cls}|${voteCodeGlobal}|${agree}|${disagree}|${absent}`;
 
+    let wrap = document.createElement("div");
+    wrap.style.display = "flex";
+    wrap.style.alignItems = "center";
+    wrap.style.justifyContent = "center";
+    wrap.style.gap = "20px";
+    wrap.style.marginTop = "20px";
+
     let qrBox = document.createElement("div");
-    qrBox.style.marginTop = "20px";
 
-    document.getElementById("resultArea").appendChild(qrBox);
+    let textBox = document.createElement("div");
+    textBox.innerHTML =
+      `<div style="font-size:20px;font-weight:bold;">
+        評議委員Aの端末で左のQRコードを読み取ってください
+      </div>
+      <div style="font-size:14px;">
+        読み取ると投票結果が送信されます
+      </div>`;
 
-    new QRCode(qrBox, {
-      text: data,
-      width: 220,
-      height: 220
-    });
+    wrap.appendChild(qrBox);
+    wrap.appendChild(textBox);
+
+    document.getElementById("resultArea").appendChild(wrap);
+
+   new QRCode(qrBox, {
+  text: data,
+  width: 260,
+  height: 260,
+  colorDark : "#000000",
+  colorLight : "#ffffff",
+  correctLevel : QRCode.CorrectLevel.H
+});
+
+  // 子機2はボタン消す
+  if(role==="child2"){
+    document.getElementById("mergeBtn").style.display="none";
   }
+}
 
   // 子機2は読み取りボタン消す
   if(role==="child2"){
