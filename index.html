@@ -196,40 +196,19 @@ let html5QrCode;
 
 // QR開始
 function startQR(){
-
   document.getElementById("qrStartBtn").style.display="none";
-
-  // ★既存のQRがあれば止める
-  if(html5QrCode){
-    html5QrCode.stop().catch(()=>{});
-  }
 
   html5QrCode = new Html5Qrcode("reader");
 
-  Html5Qrcode.getCameras().then(devices => {
-
-    if(devices && devices.length){
-      let cameraId = devices[0].id;
-
-      html5QrCode.start(
-        cameraId,
-        { fps: 10, qrbox: 250 },
-        (text)=>{
-          onScanSuccess(text);
-          html5QrCode.stop();
-        },
-        (err)=>{}
-      );
-    } else {
-      alert("カメラが見つかりません");
+  html5QrCode.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: 250 },
+    (text)=>{
+      onScanSuccess(text);
+      html5QrCode.stop();
     }
-
-  }).catch(err=>{
-    alert("カメラ起動失敗");
-    console.error(err);
-  });
+  );
 }
-
 // QR読み取り
 function onScanSuccess(text){
 
