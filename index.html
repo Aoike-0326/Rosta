@@ -451,6 +451,31 @@ function mergeData(text){
 
   alert("合体成功！");
 }
+
+  //GAS送信
+  function submitData(){
+
+  let data = {
+    class: cls,
+    code: voteCodeGlobal,
+    agree: agree,
+    disagree: disagree,
+    absent: absent
+  };
+
+  fetch("https://script.google.com/macros/s/AKfycbysO_2h1MkXY4s7DY4zHXJe0CddhAkCrgoS9WEZNiOgcqfx1H9sfR2I-GU6YkY8ec6C6Q/exec", {
+    method: "POST",
+    body: JSON.stringify(data)
+  })
+  .then(res => res.json())
+  .then(()=>{
+    alert("送信成功！");
+    location.reload();
+  })
+  .catch(()=>{
+    alert("送信失敗、QRで提出して");
+  });
+}
 </script>
 
 </body>
