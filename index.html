@@ -175,39 +175,55 @@ body {
 <!-- 結果 -->
 <div id="resultArea" class="card" style="display:none;">
 
-<div style="display:flex; gap:30px; justify-content:center; align-items:center;">
+<div style="display:flex; gap:30px; justify-content:center; align-items:center; height:100%;">
 
-  <!-- 左側（子機1用） -->
+  <!-- 左 -->
   <div id="leftPanel" style="flex:1; text-align:center;">
-    <div id="receiveStatus" style="font-size:40px; font-weight:bold;">
-      子機データ受信
+
+    <div id="receiveStatus" style="font-size:42px; font-weight:bold;">
+      子機データ未受信
     </div>
 
-    <div id="child2Data" style="font-size:28px; margin-top:20px;"></div>
+    <div id="child2Data" style="font-size:32px; margin-top:20px;"></div>
 
-    <div id="sendLabel" style="font-size:30px; margin-top:20px;">
-      生徒会にデータ送信
+    <div id="sendArea" style="display:none;">
+      <div style="font-size:30px; margin-top:20px;">
+        生徒会にデータ送信
+      </div>
+
+      <button id="sendBtn" onclick="submitData()"
+        style="font-size:32px;padding:20px;margin-top:10px;">
+        送信
+      </button>
+
+      <div id="loading" style="display:none; font-size:30px; margin-top:20px;">
+        送信中...
+      </div>
     </div>
 
-    <button id="sendBtn" onclick="submitData()"
-      style="font-size:28px;padding:20px;margin-top:10px;">
-      送信
-    </button>
-
-    <div id="loading" style="display:none; font-size:30px; margin-top:20px;">
-      送信中...
-    </div>
   </div>
 
-  <!-- 右側（QR） -->
+  <!-- 右 -->
   <div id="rightPanel" style="flex:1; text-align:center;">
-    <div id="qrArea"></div>
+
+    <div id="waitText" style="font-size:42px; font-weight:bold;">
+      別端末データ待ち
+    </div>
+
+    <button id="mergeBtn" onclick="startMergeQR()"
+      style="font-size:40px; padding:30px; margin-top:30px;">
+      QR読み取り
+    </button>
+
+    <div id="mergeReader" style="width:300px;margin:20px auto;"></div>
+
+    <div id="qrArea" style="margin-top:20px;"></div>
+
   </div>
 
 </div>
 
-<button id="mergeBtn" onclick="startMergeQR()">子機2読み取り</button>
-<div id="mergeReader" style="width:300px;margin:auto;"></div>
+</div>
 
 </div>
 
@@ -257,11 +273,6 @@ function onScanSuccess(text){
       end = Number(parts[2]);
       voteCodeGlobal = parts[3];
       role = "child2";
-
-    } else if(parts.length === 5){
-      alert("このQRは結果データです（子機1で読み取ってください）");
-      return;
-
     } else {
       alert("QR形式エラー");
       return;
@@ -270,16 +281,8 @@ function onScanSuccess(text){
 
   document.getElementById("afterScan").style.display="block";
 
-  if(role==="child2"){
-    document.getElementById("scanResult").innerHTML =
-      `<div style="font-size:60px;color:red;">
-      ${start}番から投票です
-      </div>
-      <div>${cls} ${start}〜${end}</div>`;
-  } else {
-    document.getElementById("scanResult").innerText =
-      `${cls} ${start}〜${end}`;
-  }
+  document.getElementById("scanResult").innerText =
+    `${cls} ${start}〜${end}`;
 }
 
 // 再スキャン
@@ -290,7 +293,6 @@ function resetQR(){
 // 次へ
 function confirmSetup(){
   if(role==="child2"){
-    if(!confirm(`${start}番からでOK？`)) return;
     startVotingDirect();
     return;
   }
@@ -301,11 +303,6 @@ function confirmSetup(){
 
 // 子機2QR生成
 function generateChild2QR(code){
-  if(!ranges || ranges.length < 2){
-    alert("子機2の範囲がありません");
-    return;
-  }
-
   let start2 = ranges[1].start;
   let end2 = ranges[1].end;
 
@@ -316,14 +313,7 @@ function generateChild2QR(code){
   box.style.background = "white";
   box.style.padding = "10px";
 
-  new QRCode(box, {
-    text: data,
-    width: 300,
-    height: 300,
-    colorDark:"#000",
-    colorLight:"#fff",
-    correctLevel: QRCode.CorrectLevel.H
-  });
+  new QRCode(box, { text:data, width:300, height:300 });
 
   document.getElementById("child2Area").style.display="block";
 }
@@ -340,22 +330,8 @@ function startVoting(){
   document.getElementById("voteArea").style.display="flex";
 }
 
-// QR後開始
-function startVoteAfterQR(){
-  if(!confirm("QRを閉じて投票開始？")) return;
-
-  current = start;
-  document.getElementById("child2Area").style.display="none";
-  showVotingUI();
-}
-
 // 子機2開始
 function startVotingDirect(){
-  if(!voteCodeGlobal){
-    alert("投票コードがありません");
-    return;
-  }
-
   current = start;
 
   document.getElementById("setup").style.display="none";
@@ -364,7 +340,14 @@ function startVotingDirect(){
   showVotingUI();
 }
 
-// UI表示
+// QR後開始
+function startVoteAfterQR(){
+  current = start;
+  document.getElementById("child2Area").style.display="none";
+  showVotingUI();
+}
+
+// UI
 function showVotingUI(){
   document.getElementById("voteButtons").style.display="flex";
   document.getElementById("absentBtn").style.display="block";
@@ -383,8 +366,6 @@ function update(){
 
 // 投票
 function vote(type){
-  votes.push(type);
-
   if(type==="賛成") agree++;
   if(type==="反対") disagree++;
   if(type==="欠席") absent++;
@@ -398,149 +379,74 @@ function vote(type){
   }
 }
 
-// 戻る
-function goBack(){
-  if(current===start) return;
-  if(!confirm("戻る？")) return;
-
-  current--;
-  let last=votes.pop();
-
-  if(last==="賛成") agree--;
-  if(last==="反対") disagree--;
-  if(last==="欠席") absent--;
-
-  update();
-}
-
 // 結果
 function showResult(){
   document.getElementById("voteArea").style.display="none";
   document.getElementById("resultArea").style.display="block";
 
-  // 合計
   document.getElementById("child2Data").innerHTML =
-    `<div style="font-size:50px;">
-    賛成:${agree}<br>
-    反対:${disagree}<br>
-    欠席:${absent}
-    </div>`;
+    `賛成:${agree}<br>反対:${disagree}<br>欠席:${absent}`;
 
-  // 子機2の場合
-  if(role === "child2"){
-
-    // 左パネル非表示
+  if(role==="child2"){
     document.getElementById("leftPanel").style.display="none";
 
     let data = `${cls}|${voteCodeGlobal}|${agree}|${disagree}|${absent}`;
 
-    let qrBox = document.createElement("div");
+    let qrBox=document.createElement("div");
     qrBox.style.background="white";
     qrBox.style.padding="10px";
 
     document.getElementById("qrArea").appendChild(qrBox);
 
-    new QRCode(qrBox, {
-      text: data,
-      width: 300,
-      height: 300
-    });
+    new QRCode(qrBox,{text:data,width:300,height:300});
 
-    // 子機2は読み取りボタンも不要
+    document.getElementById("waitText").innerText="このQRを子機1で読み取る";
     document.getElementById("mergeBtn").style.display="none";
   }
-
-  // 子機1の場合
-  else {
-
-    // QR出さない
-    document.getElementById("qrArea").innerHTML = "";
-
-    // 初期状態
-    document.getElementById("receiveStatus").innerText =
-      "子機データ受信待ち";
-  }
 }
+
+// 合体
+function startMergeQR(){
+  let qr=new Html5Qrcode("mergeReader");
+
+  qr.start({facingMode:"environment"},{fps:10,qrbox:250},
+    (text)=>{ mergeData(text); qr.stop(); });
+}
+
+function mergeData(text){
+  let [cls2, code2, a, d, ab] = text.split("|");
+
+  if(cls2!==cls || code2!==voteCodeGlobal){
+    alert("不一致");
+    return;
+  }
+
+  agree+=Number(a);
+  disagree+=Number(d);
+  absent+=Number(ab);
+
+  document.getElementById("receiveStatus").innerText="子機2データ受信完了";
+
+  document.getElementById("child2Data").innerHTML =
+    `賛成:${agree}<br>反対:${disagree}<br>欠席:${absent}`;
+
+  document.getElementById("waitText").style.display="none";
+  document.getElementById("mergeBtn").style.display="none";
+  document.getElementById("mergeReader").style.display="none";
+
+  document.getElementById("sendArea").style.display="block";
+}
+
 // 送信
 function submitData(){
-
   document.getElementById("loading").style.display="block";
   document.getElementById("sendBtn").style.display="none";
 
-  let data = {
-    class: cls,
-    code: voteCodeGlobal,
-    agree: agree,
-    disagree: disagree,
-    absent: absent
-  };
+  let data={class:cls,code:voteCodeGlobal,agree,disagree,absent};
 
-  fetch("https://script.google.com/macros/s/AKfycbysO_2h1MkXY4s7DY4zHXJe0CddhAkCrgoS9WEZNiOgcqfx1H9sfR2I-GU6YkY8ec6C6Q/exec", {
-    method:"POST",
-    body:JSON.stringify(data)
-  })
-  .then(()=>{
-    alert("送信成功！");
-    location.reload();
-  })
-  .catch(()=>{
-    alert("送信失敗");
-    document.getElementById("loading").style.display="none";
-    document.getElementById("sendBtn").style.display="block";
-  });
-}
-
-// 合体QR開始
-function startMergeQR(){
-  let qr = new Html5Qrcode("mergeReader");
-
-  qr.start(
-    { facingMode: "environment" },
-    { fps: 10, qrbox: 250 },
-    (text)=>{
-      mergeData(text);
-      qr.stop();
-    }
-  );
-}
-
-// 合体処理
-function mergeData(text){
-  let parts = text.split("|");
-
-  if(parts.length !== 5){
-    alert("形式エラー");
-    return;
-  }
-
-  let [cls2, code2, a, d, ab] = parts;
-
-  if(cls2 !== cls){
-    alert("クラス違う！");
-    return;
-  }
-
-  if(code2 !== voteCodeGlobal){
-    alert("投票コード違う！");
-    return;
-  }
-
-  agree += Number(a);
-  disagree += Number(d);
-  absent += Number(ab);
-
-  // UI更新
-  document.getElementById("receiveStatus").innerText =
-    "子機2データ受信完了";
-
-  document.getElementById("child2Data").innerHTML =
-    `<div style="font-size:50px;">
-    賛成:${agree}<br>
-    反対:${disagree}<br>
-    欠席:${absent}
-    </div>`;
-
-  alert("合体成功！");
+  fetch("ここにGASのURL",{method:"POST",body:JSON.stringify(data)})
+  .then(()=>{ alert("送信成功"); location.reload(); })
+  .catch(()=>{ alert("失敗"); });
 }
 </script>
 
