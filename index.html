@@ -181,6 +181,11 @@ body {
 <button id="mergeBtn" onclick="startMergeQR()">子機2読み取り</button>
 <div id="mergeReader" style="width:300px;margin:auto;"></div>
 
+<!-- 送信ボタン -->
+<button onclick="submitData()" style="font-size:30px;padding:20px;margin-top:20px;">
+  送信
+</button>
+
 </div>
 
 </div>
@@ -285,8 +290,19 @@ function generateChild2QR(code){
 
   let data = `${cls}|${start2}|${end2}|${code}`;
 
-  document.getElementById("child2QR").innerHTML = "";
-  new QRCode(document.getElementById("child2QR"), data);
+  let box = document.getElementById("child2QR");
+  box.innerHTML = "";
+  box.style.background = "white";
+  box.style.padding = "10px";
+
+  new QRCode(box, {
+    text: data,
+    width: 300,
+    height: 300,
+    colorDark:"#000",
+    colorLight:"#fff",
+    correctLevel: QRCode.CorrectLevel.H
+  });
 
   document.getElementById("child2Area").style.display="block";
 }
@@ -314,6 +330,11 @@ function startVoteAfterQR(){
 
 // 子機2開始
 function startVotingDirect(){
+  if(!voteCodeGlobal){
+    alert("投票コードがありません");
+    return;
+  }
+
   current = start;
 
   document.getElementById("setup").style.display="none";
@@ -388,18 +409,44 @@ function showResult(){
     let data = `${cls}|${voteCodeGlobal}|${agree}|${disagree}|${absent}`;
 
     let qrBox = document.createElement("div");
-    qrBox.style.marginTop = "20px";
+    qrBox.style.background="white";
+    qrBox.style.padding="10px";
+    qrBox.style.marginTop="20px";
 
     document.getElementById("resultArea").appendChild(qrBox);
 
     new QRCode(qrBox, {
       text: data,
-      width: 260,
-      height: 260
+      width: 300,
+      height: 300
     });
 
     document.getElementById("mergeBtn").style.display="none";
   }
+}
+
+// 送信
+function submitData(){
+
+  let data = {
+    class: cls,
+    code: voteCodeGlobal,
+    agree: agree,
+    disagree: disagree,
+    absent: absent
+  };
+
+  fetch("https://script.google.com/macros/s/AKfycbysO_2h1MkXY4s7DY4zHXJe0CddhAkCrgoS9WEZNiOgcqfx1H9sfR2I-GU6YkY8ec6C6Q/exec", {
+    method:"POST",
+    body:JSON.stringify(data)
+  })
+  .then(()=>{
+    alert("送信成功！");
+    location.reload();
+  })
+  .catch(()=>{
+    alert("送信失敗（QRで提出）");
+  });
 }
 
 // 合体QR開始
@@ -450,31 +497,6 @@ function mergeData(text){
      </div>`;
 
   alert("合体成功！");
-}
-
-  //GAS送信
-  function submitData(){
-
-  let data = {
-    class: cls,
-    code: voteCodeGlobal,
-    agree: agree,
-    disagree: disagree,
-    absent: absent
-  };
-
-  fetch("https://script.google.com/macros/s/AKfycbysO_2h1MkXY4s7DY4zHXJe0CddhAkCrgoS9WEZNiOgcqfx1H9sfR2I-GU6YkY8ec6C6Q/exec", {
-    method: "POST",
-    body: JSON.stringify(data)
-  })
-  .then(res => res.json())
-  .then(()=>{
-    alert("送信成功！");
-    location.reload();
-  })
-  .catch(()=>{
-    alert("送信失敗、QRで提出して");
-  });
 }
 </script>
 
