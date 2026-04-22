@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Rösta│ルスタ18</title>
+<title>Rösta│ルスタ19</title>
 
 <script src="https://unpkg.com/html5-qrcode"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -230,7 +230,9 @@ function startQR(){
    onScanSuccess(text);
    html5QrCode.stop();
   }
- );
+ ).catch(err=>{
+   alert("カメラエラー: "+err);
+ });
 }
 
 // QR読み取り
@@ -284,59 +286,36 @@ function confirmSetup(){
  document.getElementById("codeInput").style.display="block";
 }
 
-// QRリセット
+// リセット
 function resetQR(){
  location.reload();
 }
 
 // 子機2QR生成
 function generateChild2QR(){
+ if(!ranges || ranges.length < 2){
+  alert("子機2データなし");
+  return;
+ }
 
-  console.log("コード確認:", voteCodeGlobal);
+ let start2=ranges[1].start;
+ let end2=ranges[1].end;
 
-  if(!ranges || ranges.length < 2){
-    alert("子機2データなし");
-    return;
-  }
+ let data=`${cls}|${start2}|${end2}|${voteCodeGlobal}`;
 
-  let start2 = ranges[1].start;
-  let end2 = ranges[1].end;
+ let box=document.getElementById("child2QR");
+ box.innerHTML="";
+ box.style.background="white";
+ box.style.padding="10px";
 
-  let data = `${cls}|${start2}|${end2}|${voteCodeGlobal}`;
+ new QRCode(box,{text:data,width:260,height:260});
 
-  console.log("QR中身:", data);
-
-  let box = document.getElementById("child2QR");
-  box.innerHTML="";
-  box.style.background="white";
-  box.style.padding="10px";
-
-  new QRCode(box,{
-    text:data,
-    width:260,
-    height:260
-  });
-
-  document.getElementById("child2Area").style.display="block";
-}
-
-  voteCodeGlobal = code;
-
-  if(!confirm(`${start}〜${end}で設定します。よろしいですか？`)) return;
-
-  // QR生成
-  generateChild2QR();
-
-  document.getElementById("codeInput").style.display="none";
-  document.getElementById("voteArea").style.display="flex";
-}
-
-  document.getElementById("child2Area").style.display="block";
+ document.getElementById("child2Area").style.display="block";
 }
 
 // 投票開始（子機1）
 function startVoting(){
- let code=document.getElementById("voteCode").value;
+ let code=document.getElementById("voteCode").value.trim();
 
  if(!code){
   alert("投票コード入力して");
@@ -365,7 +344,7 @@ function startVotingDirect(){
 
 // QR後開始
 function startVoteAfterQR(){
- if(!confirm("QRを閉じて投票開始？")) return;
+ if(!confirm("QR閉じて開始？")) return;
 
  current=start;
  document.getElementById("child2Area").style.display="none";
@@ -397,18 +376,17 @@ function vote(type){
  if(type==="欠席") absent++;
 
  current++;
-
  current>end?showResult():update();
 }
 
 // 戻る
 function goBack(){
  if(current===start){
-  alert("これ以上戻れない");
+  alert("戻れない");
   return;
  }
 
- if(!confirm("1つ戻りますか？")) return;
+ if(!confirm("1つ戻る？")) return;
 
  current--;
 
@@ -439,7 +417,6 @@ function showResult(){
   box.style.padding="10px";
 
   document.getElementById("qrArea").appendChild(box);
-
   new QRCode(box,{text:data,width:260,height:260});
 
   document.getElementById("waitText").innerText="このQRを子機1で読み取る";
@@ -462,7 +439,7 @@ function mergeData(text){
  let [c,code,a,d,ab]=text.split("|");
 
  if(c!==cls||code!==voteCodeGlobal){
-  alert("不一致");
+  alert("投票コードエラー");
   return;
  }
 
