@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Rösta│ルスタ13</title>
+<title>Rösta│ルスタ14</title>
 
 <script src="https://unpkg.com/html5-qrcode"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -301,18 +301,37 @@ function generateChild2QR(){
 
  let data=`${cls}|${start2}|${end2}|${voteCodeGlobal}`;
 
- let box=document.getElementById("child2QR");
- box.innerHTML="";
- box.style.background="white";
- box.style.padding="10px";
+function generateChild2QR(){
 
- new QRCode(box,{
-  text:data,
-  width:260,
-  height:260
- });
+  if(!voteCodeGlobal){
+    alert("投票コードが空");
+    return;
+  }
 
- document.getElementById("child2Area").style.display="block";
+  if(!ranges || ranges.length<2){
+    alert("子機2データなし");
+    return;
+  }
+
+  let start2 = ranges[1].start;
+  let end2 = ranges[1].end;
+
+  let data = `${cls}|${start2}|${end2}|${voteCodeGlobal}`;
+
+  console.log("QR中身:", data); // ←これ超重要
+
+  let box = document.getElementById("child2QR");
+  box.innerHTML="";
+  box.style.background="white";
+  box.style.padding="10px";
+
+  new QRCode(box,{
+    text:data,
+    width:260,
+    height:260
+  });
+
+  document.getElementById("child2Area").style.display="block";
 }
 
 // 投票開始（子機1）
