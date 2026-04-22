@@ -174,19 +174,40 @@ body {
 
 <!-- 結果 -->
 <div id="resultArea" class="card" style="display:none;">
-<h2>結果</h2>
 
-<p id="resultText"></p>
+<div style="display:flex; gap:30px; justify-content:center; align-items:center;">
+
+  <!-- 左側（子機1用） -->
+  <div id="leftPanel" style="flex:1; text-align:center;">
+    <div id="receiveStatus" style="font-size:40px; font-weight:bold;">
+      子機データ受信
+    </div>
+
+    <div id="child2Data" style="font-size:28px; margin-top:20px;"></div>
+
+    <div id="sendLabel" style="font-size:30px; margin-top:20px;">
+      生徒会にデータ送信
+    </div>
+
+    <button id="sendBtn" onclick="submitData()"
+      style="font-size:28px;padding:20px;margin-top:10px;">
+      送信
+    </button>
+
+    <div id="loading" style="display:none; font-size:30px; margin-top:20px;">
+      送信中...
+    </div>
+  </div>
+
+  <!-- 右側（QR） -->
+  <div id="rightPanel" style="flex:1; text-align:center;">
+    <div id="qrArea"></div>
+  </div>
+
+</div>
 
 <button id="mergeBtn" onclick="startMergeQR()">子機2読み取り</button>
 <div id="mergeReader" style="width:300px;margin:auto;"></div>
-
-<!-- 送信ボタン -->
-<button onclick="submitData()" style="font-size:30px;padding:20px;margin-top:20px;">
-  送信
-</button>
-
-</div>
 
 </div>
 
@@ -397,23 +418,27 @@ function showResult(){
   document.getElementById("voteArea").style.display="none";
   document.getElementById("resultArea").style.display="block";
 
-  document.getElementById("resultText").innerHTML =
-    `<div style="font-size:60px;font-weight:bold;">合計</div>
-     <div style="font-size:50px;">
-     賛成:${agree}<br>
-     反対:${disagree}<br>
-     欠席:${absent}
-     </div>`;
+  // 合計
+  document.getElementById("child2Data").innerHTML =
+    `<div style="font-size:50px;">
+    賛成:${agree}<br>
+    反対:${disagree}<br>
+    欠席:${absent}
+    </div>`;
 
+  // 子機2の場合
   if(role === "child2"){
+
+    // 左パネル非表示
+    document.getElementById("leftPanel").style.display="none";
+
     let data = `${cls}|${voteCodeGlobal}|${agree}|${disagree}|${absent}`;
 
     let qrBox = document.createElement("div");
     qrBox.style.background="white";
     qrBox.style.padding="10px";
-    qrBox.style.marginTop="20px";
 
-    document.getElementById("resultArea").appendChild(qrBox);
+    document.getElementById("qrArea").appendChild(qrBox);
 
     new QRCode(qrBox, {
       text: data,
@@ -421,12 +446,26 @@ function showResult(){
       height: 300
     });
 
+    // 子機2は読み取りボタンも不要
     document.getElementById("mergeBtn").style.display="none";
   }
-}
 
+  // 子機1の場合
+  else {
+
+    // QR出さない
+    document.getElementById("qrArea").innerHTML = "";
+
+    // 初期状態
+    document.getElementById("receiveStatus").innerText =
+      "子機データ受信待ち";
+  }
+}
 // 送信
 function submitData(){
+
+  document.getElementById("loading").style.display="block";
+  document.getElementById("sendBtn").style.display="none";
 
   let data = {
     class: cls,
@@ -445,7 +484,9 @@ function submitData(){
     location.reload();
   })
   .catch(()=>{
-    alert("送信失敗（QRで提出）");
+    alert("送信失敗");
+    document.getElementById("loading").style.display="none";
+    document.getElementById("sendBtn").style.display="block";
   });
 }
 
@@ -488,13 +529,16 @@ function mergeData(text){
   disagree += Number(d);
   absent += Number(ab);
 
-  document.getElementById("resultText").innerHTML =
-    `<div style="font-size:60px;font-weight:bold;">合計</div>
-     <div style="font-size:50px;">
-     賛成:${agree}<br>
-     反対:${disagree}<br>
-     欠席:${absent}
-     </div>`;
+  // UI更新
+  document.getElementById("receiveStatus").innerText =
+    "子機2データ受信完了";
+
+  document.getElementById("child2Data").innerHTML =
+    `<div style="font-size:50px;">
+    賛成:${agree}<br>
+    反対:${disagree}<br>
+    欠席:${absent}
+    </div>`;
 
   alert("合体成功！");
 }
