@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Rösta│ルスタ14</title>
+<title>Rösta│ルスタ15</title>
 
 <script src="https://unpkg.com/html5-qrcode"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -291,24 +291,10 @@ function resetQR(){
 
 // 子機2QR生成
 function generateChild2QR(){
- if(!ranges || ranges.length<2){
-  alert("子機2データなし");
-  return;
- }
 
- let start2=ranges[1].start;
- let end2=ranges[1].end;
+  console.log("コード確認:", voteCodeGlobal);
 
- let data=`${cls}|${start2}|${end2}|${voteCodeGlobal}`;
-
-function generateChild2QR(){
-
-  if(!voteCodeGlobal){
-    alert("投票コードが空");
-    return;
-  }
-
-  if(!ranges || ranges.length<2){
+  if(!ranges || ranges.length < 2){
     alert("子機2データなし");
     return;
   }
@@ -318,7 +304,7 @@ function generateChild2QR(){
 
   let data = `${cls}|${start2}|${end2}|${voteCodeGlobal}`;
 
-  console.log("QR中身:", data); // ←これ超重要
+  console.log("QR中身:", data);
 
   let box = document.getElementById("child2QR");
   box.innerHTML="";
@@ -330,6 +316,20 @@ function generateChild2QR(){
     width:260,
     height:260
   });
+
+  document.getElementById("child2Area").style.display="block";
+}
+
+  voteCodeGlobal = code;
+
+  if(!confirm(`${start}〜${end}で設定します。よろしいですか？`)) return;
+
+  // QR生成
+  generateChild2QR();
+
+  document.getElementById("codeInput").style.display="none";
+  document.getElementById("voteArea").style.display="flex";
+}
 
   document.getElementById("child2Area").style.display="block";
 }
