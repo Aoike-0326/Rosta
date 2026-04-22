@@ -347,10 +347,10 @@ function goBack(){
 // 結果
 function showResult(){
 
-  if(!voteCodeGlobal){
-    alert("投票コードエラー");
-    return;
-  }
+  if(role !== "child2" && !voteCodeGlobal){
+  alert("投票コードエラー");
+  return;
+}
 
   document.getElementById("voteArea").style.display="none";
   document.getElementById("resultArea").style.display="block";
