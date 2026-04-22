@@ -119,10 +119,10 @@ body {
 
 <div id="afterScan" style="display:none;">
   <div class="big-text" style="color:#0f0;">読み取り成功</div>
-  <div id="scanResult" style="font-size:32px;margin-top:20px;"></div>
+  <div id="scanResult" style="font-size:36px;margin-top:20px;"></div>
 
   <button class="qr-btn" onclick="confirmSetup()">次へ</button>
-  <button class="qr-btn" onclick="resetQR()">再スキャン</button>
+  <button class="qr-btn" onclick="resetQR()">最初に戻る</button>
 </div>
 </div>
 
@@ -132,6 +132,7 @@ body {
 <input id="voteCode" style="font-size:32px;">
 <br><br>
 <button class="qr-btn" onclick="startVoting()">開始</button>
+<button class="qr-btn" onclick="resetQR()">最初に戻る</button>
 </div>
 
 <!-- 投票 -->
@@ -142,27 +143,11 @@ body {
 <div id="progress"></div>
 <div id="studentId"></div>
 
-<!-- 子機2QR -->
-<div id="child2Area" style="display:none; margin:10px 0;">
-  <div style="display:flex; justify-content:center; align-items:center; gap:20px;">
-    
-    <div id="child2QR"></div>
-
-    <div style="text-align:left;">
-      <div style="font-size:20px; font-weight:bold;">
-        評議委員別端末用QR
-      </div>
-      <div style="font-size:14px;">
-        もう1人の評議委員がこのQRを読み込んでください
-      </div>
-    </div>
-
-  </div>
-
-  <button class="qr-btn" onclick="startVoteAfterQR()">次へ（投票開始）</button>
+<div id="child2Area" style="display:none;">
+  <div id="child2QR"></div>
+  <button class="qr-btn" onclick="startVoteAfterQR()">次へ</button>
 </div>
 
-<!-- 投票ボタン -->
 <div class="vote-main" id="voteButtons" style="display:none;">
   <button class="vote-half agree" onclick="vote('賛成')">賛成</button>
   <button class="vote-half disagree" onclick="vote('反対')">反対</button>
@@ -175,28 +160,24 @@ body {
 <!-- 結果 -->
 <div id="resultArea" class="card" style="display:none;">
 
-<div style="display:flex; gap:30px; justify-content:center; align-items:center; height:100%;">
+<div style="display:flex; height:100%; align-items:center; justify-content:center;">
 
   <!-- 左 -->
   <div id="leftPanel" style="flex:1; text-align:center;">
 
-    <div id="receiveStatus" style="font-size:42px; font-weight:bold;">
+    <div id="receiveStatus" style="font-size:60px; font-weight:bold;">
       子機データ未受信
     </div>
 
-    <div id="child2Data" style="font-size:32px; margin-top:20px;"></div>
+    <div id="child2Data" style="font-size:40px; margin-top:20px;"></div>
 
     <div id="sendArea" style="display:none;">
-      <div style="font-size:30px; margin-top:20px;">
-        生徒会にデータ送信
-      </div>
-
       <button id="sendBtn" onclick="submitData()"
-        style="font-size:32px;padding:20px;margin-top:10px;">
-        送信
+        style="font-size:36px;padding:25px;margin-top:30px;">
+        生徒会に送信
       </button>
 
-      <div id="loading" style="display:none; font-size:30px; margin-top:20px;">
+      <div id="loading" style="display:none; font-size:32px; margin-top:20px;">
         送信中...
       </div>
     </div>
@@ -217,7 +198,7 @@ body {
 
     <div id="mergeReader" style="width:300px;margin:20px auto;"></div>
 
-    <div id="qrArea" style="margin-top:20px;"></div>
+    <div id="qrArea"></div>
 
   </div>
 
@@ -229,9 +210,8 @@ body {
 
 <script>
 let cls="", ranges=[], role="";
-let start=1, end=0, current;
-let votes=[];
-let agree=0, disagree=0, absent=0;
+let start=1,end=0,current;
+let agree=0,disagree=0,absent=0;
 let voteCodeGlobal="";
 let html5QrCode;
 
@@ -239,12 +219,11 @@ let html5QrCode;
 function startQR(){
   document.getElementById("qrStartBtn").style.display="none";
 
-  html5QrCode = new Html5Qrcode("reader");
-
+  html5QrCode=new Html5Qrcode("reader");
   html5QrCode.start(
-    { facingMode: "environment" },
-    { fps: 10, qrbox: 250 },
-    (text)=>{
+    {facingMode:"environment"},
+    {fps:10,qrbox:250},
+    text=>{
       onScanSuccess(text);
       html5QrCode.stop();
     }
@@ -253,97 +232,65 @@ function startQR(){
 
 // QR読み取り
 function onScanSuccess(text){
-  try {
-    let data = JSON.parse(text);
-
-    cls = data.class;
-    ranges = data.ranges || [];
-
-    let r = ranges[0];
-    start = r.start;
-    end = r.end;
-    role = r.role;
-
-  } catch(e) {
-    let parts = text.split("|");
-
-    if(parts.length === 4){
-      cls = parts[0];
-      start = Number(parts[1]);
-      end = Number(parts[2]);
-      voteCodeGlobal = parts[3];
-      role = "child2";
-    } else {
-      alert("QR形式エラー");
-      return;
-    }
+  try{
+    let data=JSON.parse(text);
+    cls=data.class;
+    ranges=data.ranges;
+    start=ranges[0].start;
+    end=ranges[0].end;
+    role=ranges[0].role;
+  }catch{
+    let p=text.split("|");
+    cls=p[0]; start=+p[1]; end=+p[2];
+    voteCodeGlobal=p[3];
+    role="child2";
   }
 
   document.getElementById("afterScan").style.display="block";
 
-  document.getElementById("scanResult").innerText =
-    `${cls} ${start}〜${end}`;
-}
-
-// 再スキャン
-function resetQR(){
-  location.reload();
+  if(role==="child2"){
+    document.getElementById("scanResult").innerHTML=
+      `<div style="font-size:60px;color:red;">
+      ${start}〜${end}で投票
+      </div>`;
+  }else{
+    document.getElementById("scanResult").innerText=
+      `${cls} ${start}〜${end}`;
+  }
 }
 
 // 次へ
 function confirmSetup(){
   if(role==="child2"){
+    if(!confirm(`${start}〜${end}で投票開始します。よろしいですか？`)) return;
     startVotingDirect();
     return;
   }
-
   document.getElementById("setup").style.display="none";
   document.getElementById("codeInput").style.display="block";
 }
 
-// 子機2QR生成
-function generateChild2QR(code){
-  let start2 = ranges[1].start;
-  let end2 = ranges[1].end;
-
-  let data = `${cls}|${start2}|${end2}|${code}`;
-
-  let box = document.getElementById("child2QR");
-  box.innerHTML = "";
-  box.style.background = "white";
-  box.style.padding = "10px";
-
-  new QRCode(box, { text:data, width:300, height:300 });
-
-  document.getElementById("child2Area").style.display="block";
-}
+// リセット
+function resetQR(){ location.reload(); }
 
 // 投票開始（子機1）
 function startVoting(){
   let code=document.getElementById("voteCode").value;
+  voteCodeGlobal=code;
 
-  voteCodeGlobal = code;
-
-  generateChild2QR(code);
+  if(!confirm(`${start}〜${end}で投票開始します。よろしいですか？`)) return;
 
   document.getElementById("codeInput").style.display="none";
   document.getElementById("voteArea").style.display="flex";
-}
-
-// 子機2開始
-function startVotingDirect(){
-  current = start;
-
-  document.getElementById("setup").style.display="none";
-  document.getElementById("voteArea").style.display="flex";
-
+  current=start;
   showVotingUI();
 }
 
-// QR後開始
-function startVoteAfterQR(){
-  current = start;
-  document.getElementById("child2Area").style.display="none";
+// 子機2
+function startVotingDirect(){
+  current=start;
+  document.getElementById("setup").style.display="none";
+  document.getElementById("voteArea").style.display="flex";
   showVotingUI();
 }
 
@@ -354,13 +301,10 @@ function showVotingUI(){
   update();
 }
 
-// 更新
 function update(){
-  document.getElementById("progress").innerText =
-    `${current} / ${end}`;
-
-  let [g,c]=cls.split("-");
-  document.getElementById("studentId").innerText =
+  document.getElementById("progress").innerText=`${current}/${end}`;
+  let[g,c]=cls.split("-");
+  document.getElementById("studentId").innerText=
     `${g}${c}${String(current).padStart(2,"0")}`;
 }
 
@@ -369,14 +313,8 @@ function vote(type){
   if(type==="賛成") agree++;
   if(type==="反対") disagree++;
   if(type==="欠席") absent++;
-
   current++;
-
-  if(current>end){
-    showResult();
-  }else{
-    update();
-  }
+  current>end?showResult():update();
 }
 
 // 結果
@@ -384,21 +322,18 @@ function showResult(){
   document.getElementById("voteArea").style.display="none";
   document.getElementById("resultArea").style.display="block";
 
-  document.getElementById("child2Data").innerHTML =
+  document.getElementById("child2Data").innerHTML=
     `賛成:${agree}<br>反対:${disagree}<br>欠席:${absent}`;
 
   if(role==="child2"){
     document.getElementById("leftPanel").style.display="none";
 
-    let data = `${cls}|${voteCodeGlobal}|${agree}|${disagree}|${absent}`;
-
-    let qrBox=document.createElement("div");
-    qrBox.style.background="white";
-    qrBox.style.padding="10px";
-
-    document.getElementById("qrArea").appendChild(qrBox);
-
-    new QRCode(qrBox,{text:data,width:300,height:300});
+    let data=`${cls}|${voteCodeGlobal}|${agree}|${disagree}|${absent}`;
+    let box=document.createElement("div");
+    box.style.background="white";
+    box.style.padding="10px";
+    document.getElementById("qrArea").appendChild(box);
+    new QRCode(box,{text:data,width:300,height:300});
 
     document.getElementById("waitText").innerText="このQRを子機1で読み取る";
     document.getElementById("mergeBtn").style.display="none";
@@ -408,26 +343,19 @@ function showResult(){
 // 合体
 function startMergeQR(){
   let qr=new Html5Qrcode("mergeReader");
-
   qr.start({facingMode:"environment"},{fps:10,qrbox:250},
-    (text)=>{ mergeData(text); qr.stop(); });
+    t=>{mergeData(t);qr.stop();}
+  );
 }
 
 function mergeData(text){
-  let [cls2, code2, a, d, ab] = text.split("|");
+  let [c,code,a,d,ab]=text.split("|");
+  if(c!==cls||code!==voteCodeGlobal){alert("不一致");return;}
 
-  if(cls2!==cls || code2!==voteCodeGlobal){
-    alert("不一致");
-    return;
-  }
-
-  agree+=Number(a);
-  disagree+=Number(d);
-  absent+=Number(ab);
+  agree+=+a;disagree+=+d;absent+=+ab;
 
   document.getElementById("receiveStatus").innerText="子機2データ受信完了";
-
-  document.getElementById("child2Data").innerHTML =
+  document.getElementById("child2Data").innerHTML=
     `賛成:${agree}<br>反対:${disagree}<br>欠席:${absent}`;
 
   document.getElementById("waitText").style.display="none";
@@ -442,11 +370,12 @@ function submitData(){
   document.getElementById("loading").style.display="block";
   document.getElementById("sendBtn").style.display="none";
 
-  let data={class:cls,code:voteCodeGlobal,agree,disagree,absent};
-
-  fetch("ここにGASのURL",{method:"POST",body:JSON.stringify(data)})
-  .then(()=>{ alert("送信成功"); location.reload(); })
-  .catch(()=>{ alert("失敗"); });
+  fetch("https://script.google.com/macros/s/AKfycbysO_2h1MkXY4s7DY4zHXJe0CddhAkCrgoS9WEZNiOgcqfx1H9sfR2I-GU6YkY8ec6C6Q/exec",{
+    method:"POST",
+    body:JSON.stringify({class:cls,code:voteCodeGlobal,agree,disagree,absent})
+  })
+  .then(()=>{alert("送信成功");location.reload();})
+  .catch(()=>{alert("失敗");});
 }
 </script>
 
