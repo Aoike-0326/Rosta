@@ -219,15 +219,14 @@ function selectRole(r){
 
 // ユーザー表示
 function updateUserBar(){
- let label = role==="child1"
  let base = cls.replace("-", "");
 
-let label = role==="child1"
- ? `評議委員A ${base}${String(start).padStart(2,"0")}~${base}${String(end).padStart(2,"0")}`
- : `評議委員B ${base}${String(start).padStart(2,"0")}~${base}${String(end).padStart(2,"0")}`;
+ let label = role==="child1"
+  ? `評議委員A ${base}${String(start).padStart(2,"0")}~${base}${String(end).padStart(2,"0")}`
+  : `評議委員B ${base}${String(start).padStart(2,"0")}~${base}${String(end).padStart(2,"0")}`;
 
- document.getElementById("userLabel").innerText=label;
- document.getElementById("userBar").style.display="block";
+ document.getElementById("userLabel").innerText = label;
+ document.getElementById("userBar").style.display = "block";
 }
 
 // メニュー
