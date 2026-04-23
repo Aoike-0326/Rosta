@@ -97,14 +97,43 @@ let votes=[];
 let html5QrCode;
 
 // 起動時
-window.onload=()=>{
- let saved=localStorage.getItem("classData");
- if(saved){
-  let d=JSON.parse(saved);
-  cls=d.cls;start=d.start;end=d.end;role=d.role;
-  document.getElementById("setup").style.display="none";
-  document.getElementById("codeInput").style.display="block";
- }
+window.onload = () => {
+  let saved = localStorage.getItem("classData");
+
+  // データが存在しない or 壊れてる
+  if (!saved) {
+    document.getElementById("setup").style.display = "block";
+    document.getElementById("codeInput").style.display = "none";
+    return;
+  }
+
+  try {
+    let d = JSON.parse(saved);
+
+    // 必須データチェック
+    if (!d.cls || !d.start || !d.end || !d.role) {
+      throw "データ不正";
+    }
+
+    // 確認ダイアログ
+    if (confirm("前回のクラス設定を使う？")) {
+      cls = d.cls;
+      start = d.start;
+      end = d.end;
+      role = d.role;
+
+      document.getElementById("setup").style.display = "none";
+      document.getElementById("codeInput").style.display = "block";
+    } else {
+      localStorage.removeItem("classData");
+      document.getElementById("setup").style.display = "block";
+    }
+
+  } catch (e) {
+    // 壊れてたら削除
+    localStorage.removeItem("classData");
+    document.getElementById("setup").style.display = "block";
+  }
 };
 
 // QR開始
