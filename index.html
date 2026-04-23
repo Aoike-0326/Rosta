@@ -1,54 +1,111 @@
+index.html
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Rösta│ルスタ20</title>
+<title>Rösta│ルスタ19</title>
 
 <script src="https://unpkg.com/html5-qrcode"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <style>
-html, body { height:100%; margin:0; }
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
 body {
- font-family:sans-serif;
- background:#111;
- color:white;
- display:flex;
- justify-content:center;
- align-items:center;
+  font-family: sans-serif;
+  background: #111;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
-.container { width:100%; max-width:1200px; height:95%; }
-.card { width:100%; height:100%; text-align:center; position:relative; }
 
-.qr-btn { font-size:28px; padding:15px 30px; margin:15px; }
+.container {
+  width: 100%;
+  max-width: 1200px;
+  height: 95%;
+}
 
-.vote-main { flex:1; display:flex; }
+.card {
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  position: relative;
+}
+
+.big-text {
+  font-size: 60px;
+  font-weight: bold;
+}
+
+.qr-btn {
+  font-size: 32px;
+  padding: 20px 40px;
+  margin: 20px;
+}
+
+#voteArea {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.vote-main {
+  flex: 1;
+  display: flex;
+}
+
 .vote-half {
- flex:1; font-size:70px; border:none;
+  flex: 1;
+  font-size: 70px;
+  font-weight: bold;
+  border: none;
+  transition: 0.1s;
 }
+
+.vote-half:active {
+  transform: scale(0.95);
+  filter: brightness(0.8);
+}
+
 .agree { background:#ff3b3b; }
 .disagree { background:#2f6bff; }
 
 .absent {
- width:100%; height:120px; font-size:40px;
- background:#444; color:white; border:none;
+  width:100%;
+  height:130px;
+  font-size:42px;
+  background:#444;
+  color:white;
+  border:none;
 }
 
-#roleBox {
- position:absolute;
- top:10px;
- left:10px;
- background:#222;
- padding:10px 15px;
- border-radius:8px;
- cursor:pointer;
+.absent:active {
+  transform: scale(0.95);
 }
-#menu {
- display:none;
- margin-top:10px;
- background:#333;
- padding:10px;
- border-radius:6px;
+
+#studentId {
+  font-size:64px;
+  font-weight:bold;
+}
+
+#progress {
+  font-size:32px;
+}
+
+.back-btn {
+  position:absolute;
+  top:15px;
+  left:15px;
+  font-size:28px;
+  padding:15px;
+  background:#ffcc00;
+  color:black;
+  font-weight:bold;
 }
 </style>
 </head>
@@ -60,39 +117,52 @@ body {
 <div id="setup" class="card">
 <h2>QR読み取り</h2>
 <div id="reader" style="width:300px;margin:auto;"></div>
-<button class="qr-btn" onclick="startQR()">QR開始</button>
+<button id="qrStartBtn" class="qr-btn" onclick="startQR()">QR開始</button>
+
+<div id="afterScan" style="display:none;">
+  <div class="big-text" style="color:#0f0;">読み取り成功</div>
+  <div id="scanResult" style="font-size:36px;margin-top:20px;"></div>
+
+  <button class="qr-btn" onclick="confirmSetup()">次へ</button>
+  <button class="qr-btn" onclick="resetQR()">最初に戻る</button>
+</div>
 </div>
 
 <!-- コード入力 -->
 <div id="codeInput" class="card" style="display:none;">
-
-<div id="roleBox" onclick="toggleMenu()">
- <span id="roleText"></span>
- <div id="menu">
-  <div onclick="logout()">ログアウト</div>
- </div>
-</div>
-
 <h2>投票コード入力</h2>
 <input id="voteCode" style="font-size:32px;">
 <br><br>
 <button class="qr-btn" onclick="startVoting()">開始</button>
+<button class="qr-btn" onclick="resetQR()">最初に戻る</button>
 </div>
 
 <!-- 投票 -->
 <div id="voteArea" class="card" style="display:none;">
-<div id="progress"></div>
-<div id="studentId" style="font-size:60px;"></div>
+<button class="back-btn" onclick="goBack()">戻る</button>
 
-<div id="child2Area" style="display:none;">
-<div id="child2QR"></div>
-<button class="qr-btn" onclick="generateChild2QR()">QR再表示</button>
-<button class="qr-btn" onclick="startVoteAfterQR()">投票開始</button>
+<div id="progress"></div>
+<div id="studentId"></div>
+
+<!-- 子機2QR -->
+<div id="child2Area" style="display:none; text-align:center;">
+  <div style="display:flex;justify-content:center;align-items:center;gap:20px;">
+    <div id="child2QR"></div>
+    <div>
+      <div style="font-size:22px;font-weight:bold;">
+        評議委員別端末用QR
+      </div>
+      <div style="font-size:14px;">
+        もう1人の評議委員が読み取ってください
+      </div>
+    </div>
+  </div>
+  <button class="qr-btn" onclick="startVoteAfterQR()">次へ（投票開始）</button>
 </div>
 
 <div class="vote-main" id="voteButtons" style="display:none;">
-<button class="vote-half agree" onclick="vote('賛成')">賛成</button>
-<button class="vote-half disagree" onclick="vote('反対')">反対</button>
+  <button class="vote-half agree" onclick="vote('賛成')">賛成</button>
+  <button class="vote-half disagree" onclick="vote('反対')">反対</button>
 </div>
 
 <button class="absent" id="absentBtn" style="display:none;" onclick="vote('欠席')">欠席</button>
@@ -100,9 +170,44 @@ body {
 
 <!-- 結果 -->
 <div id="resultArea" class="card" style="display:none;">
-<div id="resultText"></div>
-<button class="qr-btn" onclick="submitData()">送信</button>
+<div style="display:flex;height:100%;align-items:center;justify-content:center;">
+
+<!-- 左 -->
+<div id="leftPanel" style="flex:1;text-align:center;">
+<div id="receiveStatus" style="font-size:60px;font-weight:bold;">
+子機データ未受信
+</div>
+
+<div id="child2Data" style="font-size:40px;margin-top:20px;"></div>
+
+<div id="sendArea" style="display:none;">
+<button id="sendBtn" onclick="submitData()"
+style="font-size:36px;padding:25px;margin-top:30px;">
+生徒会に送信
+</button>
+
+<div id="loading" style="display:none;font-size:32px;margin-top:20px;">
+送信中...
+</div>
+</div>
+</div>
+
+<!-- 右 -->
+<div id="rightPanel" style="flex:1;text-align:center;">
+<div id="waitText" style="font-size:42px;font-weight:bold;">
+別端末データ待ち
+</div>
+
+<button id="mergeBtn" onclick="startMergeQR()"
+style="font-size:40px;padding:30px;margin-top:30px;">
+QR読み取り
+</button>
+
+<div id="mergeReader" style="width:300px;margin:20px auto;"></div>
 <div id="qrArea"></div>
+</div>
+
+</div>
 </div>
 
 </div>
@@ -114,43 +219,22 @@ let agree=0,disagree=0,absent=0;
 let voteCodeGlobal="";
 let votes=[];
 let html5QrCode;
-let isSending=false;
-
-// 起動時復元
-window.onload=function(){
- let saved=localStorage.getItem("classData");
- if(!saved) return;
-
- let data=JSON.parse(saved);
- cls=data.cls;
- ranges=data.ranges;
- role=data.role;
-
- if(role==="child1"){
-  start=ranges[0].start;
-  end=ranges[0].end;
- }else{
-  start=ranges[1].start;
-  end=ranges[1].end;
- }
-
- document.getElementById("setup").style.display="none";
- document.getElementById("codeInput").style.display="block";
-
- setRoleDisplay();
-};
 
 // QR開始
 function startQR(){
+ document.getElementById("qrStartBtn").style.display="none";
+
  html5QrCode=new Html5Qrcode("reader");
  html5QrCode.start(
   {facingMode:"environment"},
   {fps:10,qrbox:250},
   text=>{
    onScanSuccess(text);
-   html5QrCode.stop().catch(()=>{});
+   html5QrCode.stop();
   }
- );
+ ).catch(err=>{
+   alert("カメラエラー: "+err);
+ });
 }
 
 // QR読み取り
@@ -159,94 +243,112 @@ function onScanSuccess(text){
   let data=JSON.parse(text);
   cls=data.class;
   ranges=data.ranges;
-  role=ranges[0].role;
 
   start=ranges[0].start;
   end=ranges[0].end;
+  role=ranges[0].role;
 
  }catch{
   let p=text.split("|");
-  if(p.length!==4){ alert("QRエラー"); return; }
 
-  cls=p[0];
-  start=+p[1];
-  end=+p[2];
-  role=p[3];
+  if(p.length===4){
+   cls=p[0];
+   start=+p[1];
+   end=+p[2];
+   voteCodeGlobal=p[3];
+   role="child2";
+  }else{
+   alert("QR形式エラー");
+   return;
+  }
  }
 
- localStorage.setItem("classData",JSON.stringify({cls,ranges,role}));
+ document.getElementById("afterScan").style.display="block";
+
+ if(role==="child2"){
+  document.getElementById("scanResult").innerHTML=
+   `<div style="font-size:60px;color:red;">
+   ${start}〜${end}で投票
+   </div>`;
+ }else{
+  document.getElementById("scanResult").innerText=
+   `${cls} ${start}〜${end}`;
+ }
+}
+
+// 次へ
+function confirmSetup(){
+ if(role==="child2"){
+  if(!confirm(`${start}〜${end}で投票開始します。よろしいですか？`)) return;
+  startVotingDirect();
+  return;
+ }
 
  document.getElementById("setup").style.display="none";
  document.getElementById("codeInput").style.display="block";
-
- setRoleDisplay();
 }
 
-// 表示
-function setRoleDisplay(){
- let label = (role==="child1")
-  ? `評議員A ${start}〜${end}`
-  : `評議員B ${start}〜${end}`;
-
- document.getElementById("roleText").innerText=label;
-}
-
-// メニュー
-function toggleMenu(){
- let m=document.getElementById("menu");
- m.style.display=(m.style.display==="block")?"none":"block";
-}
-
-// 外クリック閉じ
-document.addEventListener("click",e=>{
- let box=document.getElementById("roleBox");
- if(!box.contains(e.target)){
-  document.getElementById("menu").style.display="none";
- }
-});
-
-// ログアウト
-function logout(){
- if(!confirm("リセットする？")) return;
- localStorage.removeItem("classData");
+// リセット
+function resetQR(){
  location.reload();
 }
 
-// 投票開始
-function startVoting(){
- let code=document.getElementById("voteCode").value.trim();
- if(!code){ alert("コード入力"); return; }
-
- voteCodeGlobal=code;
-
- current=start;
-
- document.getElementById("roleBox").style.display="none";
- document.getElementById("codeInput").style.display="none";
- document.getElementById("voteArea").style.display="block";
-
- if(role==="child1"){
-  generateChild2QR();
- }else{
-  showVotingUI();
- }
-}
-
-// 子機2QR
+// 子機2QR生成
 function generateChild2QR(){
- let data=`${cls}|${ranges[1].start}|${ranges[1].end}|child2`;
+ if(!ranges || ranges.length < 2){
+  alert("子機2データなし");
+  return;
+ }
+
+ let start2=ranges[1].start;
+ let end2=ranges[1].end;
+
+ let data=`${cls}|${start2}|${end2}|${voteCodeGlobal}`;
 
  let box=document.getElementById("child2QR");
  box.innerHTML="";
  box.style.background="white";
+ box.style.padding="10px";
 
- new QRCode(box,{text:data,width:250,height:250});
+ new QRCode(box,{text:data,width:260,height:260});
 
  document.getElementById("child2Area").style.display="block";
 }
 
+// 投票開始（子機1）
+function startVoting(){
+ let code=document.getElementById("voteCode").value.trim();
+
+ if(!code){
+  alert("投票コード入力して");
+  return;
+ }
+
+ voteCodeGlobal=code;
+
+ if(!confirm(`${start}〜${end}で設定します。よろしいですか？`)) return;
+
+ generateChild2QR();
+
+ document.getElementById("codeInput").style.display="none";
+ document.getElementById("voteArea").style.display="flex";
+}
+
+// 子機2開始
+function startVotingDirect(){
+ current=start;
+
+ document.getElementById("setup").style.display="none";
+ document.getElementById("voteArea").style.display="flex";
+
+ showVotingUI();
+}
+
 // QR後開始
 function startVoteAfterQR(){
+ if(!confirm("QR閉じて開始？")) return;
+
+ current=start;
  document.getElementById("child2Area").style.display="none";
  showVotingUI();
 }
@@ -261,7 +363,10 @@ function showVotingUI(){
 // 更新
 function update(){
  document.getElementById("progress").innerText=`${current}/${end}`;
- document.getElementById("studentId").innerText=current;
+
+ let[g,c]=cls.split("-");
+ document.getElementById("studentId").innerText=
+  `${g}${c}${String(current).padStart(2,"0")}`;
 }
 
 // 投票
@@ -276,29 +381,92 @@ function vote(type){
  current>end?showResult():update();
 }
 
+// 戻る
+function goBack(){
+ if(current===start){
+  alert("戻れない");
+  return;
+ }
+
+ if(!confirm("1つ戻る？")) return;
+
+ current--;
+
+ let last=votes.pop();
+
+ if(last==="賛成") agree--;
+ if(last==="反対") disagree--;
+ if(last==="欠席") absent--;
+
+ update();
+}
+
 // 結果
 function showResult(){
  document.getElementById("voteArea").style.display="none";
  document.getElementById("resultArea").style.display="block";
 
- document.getElementById("resultText").innerHTML=
+ document.getElementById("child2Data").innerHTML=
   `賛成:${agree}<br>反対:${disagree}<br>欠席:${absent}`;
 
  if(role==="child2"){
-  let data=`ROSTA|${cls}|${voteCodeGlobal}|${agree}|${disagree}|${absent}`;
+  document.getElementById("leftPanel").style.display="none";
+
+  let data=`${cls}|${voteCodeGlobal}|${agree}|${disagree}|${absent}`;
 
   let box=document.createElement("div");
   box.style.background="white";
-  document.getElementById("qrArea").appendChild(box);
+  box.style.padding="10px";
 
-  new QRCode(box,{text:data,width:250,height:250});
+  document.getElementById("qrArea").appendChild(box);
+  new QRCode(box,{text:data,width:260,height:260});
+
+  document.getElementById("waitText").innerText="このQRを子機1で読み取る";
+  document.getElementById("mergeBtn").style.display="none";
  }
+}
+
+// 合体
+function startMergeQR(){
+ let qr=new Html5Qrcode("mergeReader");
+
+ qr.start({facingMode:"environment"},{fps:10,qrbox:250},
+  text=>{
+   mergeData(text);
+   qr.stop();
+  });
+}
+
+function mergeData(text){
+ let [c,code,a,d,ab]=text.split("|");
+
+ if(c!==cls||code!==voteCodeGlobal){
+  alert("投票コードエラー");
+  return;
+ }
+
+ agree+=+a;
+ disagree+=+d;
+ absent+=+ab;
+
+ document.getElementById("receiveStatus").innerText="子機2データ受信完了";
+
+ document.getElementById("child2Data").innerHTML=
+  `<div style="font-size:60px;">
+   賛成:${agree}<br>反対:${disagree}<br>欠席:${absent}
+  </div>`;
+
+ document.getElementById("waitText").style.display="none";
+ document.getElementById("mergeBtn").style.display="none";
+ document.getElementById("mergeReader").style.display="none";
+
+ document.getElementById("sendArea").style.display="block";
 }
 
 // 送信
 function submitData(){
- if(isSending) return;
- isSending=true;
+ document.getElementById("loading").style.display="block";
+ document.getElementById("sendBtn").style.display="none";
 
  fetch("https://script.google.com/macros/s/AKfycbysO_2h1MkXY4s7DY4zHXJe0CddhAkCrgoS9WEZNiOgcqfx1H9sfR2I-GU6YkY8ec6C6Q/exec",{
   method:"POST",
@@ -311,10 +479,7 @@ function submitData(){
   })
  })
  .then(()=>{alert("送信成功");location.reload();})
- .catch(()=>{
-  alert("失敗");
-  isSending=false;
- });
+ .catch(()=>{alert("失敗");});
 }
 </script>
 
