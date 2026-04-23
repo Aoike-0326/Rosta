@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Rösta│1</title>
+<title>Rösta│2</title>
 
 <script src="https://unpkg.com/html5-qrcode"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -146,18 +146,47 @@ body{
 
 <!-- 結果 -->
 <div id="resultArea" class="card" style="display:none;">
-<div id="resultText" class="big-text"></div>
 
-<div id="mergeArea" style="display:none;">
-<h2>子機データ受信</h2>
-<button class="qr-btn" onclick="startMergeQR()">QR読み取り</button>
-<div id="reader2" style="width:300px;margin:auto;"></div>
+<h1 id="resultTitle" style="font-size:50px;"></h1>
+
+<div style="display:flex;justify-content:space-between;align-items:center;margin-top:40px;">
+
+  <!-- 左：結果 -->
+  <div style="text-align:left;font-size:40px;">
+    <div>賛成：<span id="agreeNum"></span></div>
+    <div>反対：<span id="disagreeNum"></span></div>
+    <div>欠席：<span id="absentNum"></span></div>
+  </div>
+
+  <!-- 右：ボタン -->
+  <div style="display:flex;flex-direction:column;gap:20px;">
+
+    <button id="mergeBtn"
+      class="qr-btn"
+      onclick="startMergeQR()">
+      ① データ受信
+    </button>
+
+    <button id="sendBtn"
+      class="qr-btn"
+      onclick="submitData()"
+      style="background:#555;">
+      ② 生徒会に送信
+    </button>
+
+    <button class="qr-btn"
+      onclick="goHome()"
+      style="background:#555;">
+      ③ ホームに戻る
+    </button>
+
+  </div>
+
 </div>
 
-<div id="qrArea"></div>
+<div id="reader2" style="width:300px;margin:20px auto;"></div>
 
-<button id="sendBtn" class="qr-btn" onclick="submitData()" style="display:none;">
-生徒会に送信
+</div>
 </button>
 </div>
 
@@ -296,44 +325,68 @@ function goBack(){
 function showResult(){
  document.getElementById("voteArea").style.display="none";
  document.getElementById("resultArea").style.display="block";
- document.getElementById("userBar").style.display = "block";
+ document.getElementById("userBar").style.display="block";
 
- document.getElementById("resultText").innerHTML=
- `賛成:${agree}<br>反対:${disagree}<br>欠席:${absent}`;
+ // タイトル（最初）
+ document.getElementById("resultTitle").innerText =
+  `${start}~${end}集計結果`;
+
+ // 数字
+ document.getElementById("agreeNum").innerText = agree;
+ document.getElementById("disagreeNum").innerText = disagree;
+ document.getElementById("absentNum").innerText = absent;
 
  if(role==="child1"){
-  document.getElementById("mergeArea").style.display="block";
+  // 子機1：受信待ち
+  document.getElementById("mergeBtn").style.background="#fff";
+  document.getElementById("mergeBtn").style.color="#000";
+
+  document.getElementById("sendBtn").style.background="#555";
  }else{
+  // 子機2：QR表示
+  document.getElementById("mergeBtn").style.display="none";
+
   let data=`${cls}|${voteCodeGlobal}|${agree}|${disagree}|${absent}`;
+
   let box=document.createElement("div");
   box.style.background="white";
   box.style.padding="10px";
-  document.getElementById("qrArea").appendChild(box);
+  document.getElementById("resultArea").appendChild(box);
+
   new QRCode(box,{text:data,width:250,height:250});
  }
 }
 
 // 合体
-function startMergeQR(){
- let qr=new Html5Qrcode("reader2");
- qr.start({facingMode:"environment"},{fps:10,qrbox:250},
- text=>{
-  let[pcls,code,a,d,ab]=text.split("|");
+function mergeData(text){
+ let [c,code,a,d,ab]=text.split("|");
 
-  if(pcls!==cls||code!==voteCodeGlobal){
-   alert("コードエラー");
-   return;
-  }
+ if(c!==cls||code!==voteCodeGlobal){
+  alert("コードエラー");
+  return;
+ }
 
-  agree+=+a;disagree+=+d;absent+=+ab;
+ agree+=+a;
+ disagree+=+d;
+ absent+=+ab;
 
-  document.getElementById("resultText").innerHTML=
-  `合計<br>賛成:${agree}<br>反対:${disagree}<br>欠席:${absent}`;
+ // タイトル変更（ここ重要）
+ document.getElementById("resultTitle").innerText =
+  `${cls}集計結果`;
 
-  document.getElementById("sendBtn").style.display="block";
+ // 数字更新
+ document.getElementById("agreeNum").innerText = agree;
+ document.getElementById("disagreeNum").innerText = disagree;
+ document.getElementById("absentNum").innerText = absent;
 
-  qr.stop();
- });
+ // ボタン状態切り替え
+ document.getElementById("mergeBtn").style.background="#555";
+
+ let sendBtn=document.getElementById("sendBtn");
+ sendBtn.style.background="#fff";
+ sendBtn.style.color="#000";
+
+ alert("データ受信完了！");
 }
 
 // 送信
