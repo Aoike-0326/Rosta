@@ -220,8 +220,11 @@ function selectRole(r){
 // ユーザー表示
 function updateUserBar(){
  let label = role==="child1"
- ? `評議委員A ${cls}${String(start).padStart(2,"0")}~${cls}${String(end).padStart(2,"0")}`
- : `評議委員B ${cls}${String(start).padStart(2,"0")}~${cls}${String(end).padStart(2,"0")}`;
+ let base = cls.replace("-", "");
+
+let label = role==="child1"
+ ? `評議委員A ${base}${String(start).padStart(2,"0")}~${base}${String(end).padStart(2,"0")}`
+ : `評議委員B ${base}${String(start).padStart(2,"0")}~${base}${String(end).padStart(2,"0")}`;
 
  document.getElementById("userLabel").innerText=label;
  document.getElementById("userBar").style.display="block";
@@ -252,6 +255,7 @@ function startVoting(){
  current=start;
  document.getElementById("codeInput").style.display="none";
  document.getElementById("voteArea").style.display="block";
+ document.getElementById("userBar").style.display = "none";
 
  update();
 }
@@ -259,8 +263,9 @@ function startVoting(){
 // 更新
 function update(){
  document.getElementById("progress").innerText=`${current}/${end}`;
- let[g,c]=cls.split("-");
- document.getElementById("studentId").innerText=`${g}${c}${String(current).padStart(2,"0")}`;
+ let num = cls.replace("-", "");
+document.getElementById("studentId").innerText =
+ `${num}${String(current).padStart(2,"0")}`;
 }
 
 // 投票
@@ -292,6 +297,7 @@ function goBack(){
 function showResult(){
  document.getElementById("voteArea").style.display="none";
  document.getElementById("resultArea").style.display="block";
+ document.getElementById("userBar").style.display = "block";
 
  document.getElementById("resultText").innerHTML=
  `賛成:${agree}<br>反対:${disagree}<br>欠席:${absent}`;
