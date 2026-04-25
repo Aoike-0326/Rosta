@@ -97,6 +97,105 @@ body{
 </style>
 </head>
 
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Rösta│完成版</title>
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<style>
+body{
+ margin:0;
+ background:#111;
+ color:white;
+ font-family:sans-serif;
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ height:100vh;
+}
+
+.container{
+ width:100%;
+ max-width:1100px;
+ height:95%;
+}
+
+.card{
+ width:100%;
+ height:100%;
+ text-align:center;
+ position:relative;
+}
+
+.qr-btn{
+ font-size:28px;
+ padding:15px 30px;
+ margin:10px;
+}
+
+.big-text{
+ font-size:60px;
+ font-weight:bold;
+}
+
+.vote-main{
+ display:flex;
+ height:60%;
+}
+
+.vote-half{
+ flex:1;
+ font-size:70px;
+ border:none;
+}
+
+.agree{background:#ff3b3b;}
+.disagree{background:#2f6bff;}
+
+.absent{
+ width:100%;
+ height:120px;
+ font-size:40px;
+ background:#444;
+ border:none;
+}
+
+#progress{font-size:30px;}
+#studentId{font-size:60px;font-weight:bold;}
+
+.back-btn{
+ position:absolute;
+ top:10px;
+ left:10px;
+ font-size:20px;
+}
+
+/* ユーザー表示 */
+#userBar{
+ position:absolute;
+ top:10px;
+ left:10px;
+ background:#222;
+ padding:10px 15px;
+ border-radius:10px;
+ cursor:pointer;
+ z-index:100;
+ display:none;
+}
+
+#dropdown{
+ display:none;
+ margin-top:10px;
+ background:#333;
+ border-radius:8px;
+}
+</style>
+</head>
+
 <body>
 <div class="container">
 
@@ -169,7 +268,7 @@ body{
       ② 生徒会に送信
     </button>
 
-    <button class="qr-btn" onclick="goHome()" style="background:#555;">
+    <button id="homeBtn" class="qr-btn" onclick="goHome()" style="background:#555;">
       ③ ホームに戻る
     </button>
 
@@ -179,6 +278,10 @@ body{
 
 <div id="reader2" style="width:300px;height:300px;margin:20px auto;display:none;"></div>
 <div id="qrArea"></div>
+
+<div id="loading" style="display:none;margin-top:10px;font-size:24px;">
+送信中・・・
+</div>
 
 </div>
 
@@ -209,34 +312,36 @@ window.onload=()=>{
 
 // QR開始
 function startQR(){
-
- const btn = document.getElementById("qrBtn");
+ const btn=document.getElementById("qrBtn");
  btn.style.display="none";
 
- // 前のやつ完全停止
  if(html5QrCode){
-  try{
-   html5QrCode.stop().then(()=>{
-    html5QrCode.clear();
-   });
-  }catch(e){}
+  try{html5QrCode.stop().then(()=>html5QrCode.clear());}catch(e){}
  }
 
- html5QrCode = new Html5Qrcode("reader");
+ html5QrCode=new Html5Qrcode("reader");
 
  html5QrCode.start(
-  { facingMode: "environment" },
-  { fps: 10, qrbox: 250 }
- )
- .then(()=>{
-  console.log("カメラ起動成功");
- })
- .catch(err=>{
-  console.error("カメラ起動失敗:", err);
-  alert("カメラ起動できない（権限 or https）");
+  {facingMode:"environment"},
+  {fps:10,qrbox:250},
+  (text)=>{
+   try{
+    let data=JSON.parse(text);
+    cls=data.class;
+    ranges=data.ranges;
+
+    html5QrCode.stop();
+    document.getElementById("afterScan").style.display="block";
+   }catch{
+    alert("QRが違う");
+   }
+  }
+ ).catch(()=>{
+  alert("カメラ起動できない");
   btn.style.display="block";
  });
 }
+
 // 子機選択
 function selectRole(r){
  let target=ranges.find(x=>x.role===r);
@@ -332,63 +437,35 @@ function showResult(){
  document.getElementById("resultArea").style.display="block";
  document.getElementById("userBar").style.display="block";
 
- // タイトル
  document.getElementById("resultTitle").innerText=`${start}~${end}集計結果`;
-
- // 数字表示
  document.getElementById("agreeNum").innerText=agree;
  document.getElementById("disagreeNum").innerText=disagree;
  document.getElementById("absentNum").innerText=absent;
 
- // 子機1
  if(role==="child1"){
-  document.getElementById("mergeBtn").style.display="block";
   document.getElementById("mergeBtn").style.background="#fff";
   document.getElementById("mergeBtn").style.color="#000";
-
-  // 送信ボタンは最初無効
-  let sendBtn=document.getElementById("sendBtn");
-  sendBtn.style.background="#555";
-  sendBtn.style.color="#fff";
-  sendBtn.disabled=true;
  }
 
- // 子機2
  if(role==="child2"){
-
-  // ボタン非表示
   document.getElementById("mergeBtn").style.display="none";
   document.getElementById("sendBtn").style.display="none";
 
-  // QR表示
   let data=`${cls}|${voteCodeGlobal}|${agree}|${disagree}|${absent}`;
 
   let box=document.createElement("div");
   box.style.background="white";
   box.style.padding="10px";
-  box.style.marginTop="30px";
 
-  document.getElementById("qrArea").innerHTML="";
   document.getElementById("qrArea").appendChild(box);
-
-  new QRCode(box,{
-   text:data,
-   width:260,
-   height:260
-  });
+  new QRCode(box,{text:data,width:260,height:260});
  }
 }
 
 // QR受信
 function startMergeQR(){
-
  const reader=document.getElementById("reader2");
  reader.style.display="block";
- reader.innerHTML="";
-
- const btn=document.getElementById("mergeBtn");
- btn.innerText="読み取り中...";
- btn.disabled=true;
 
  if(mergeQr){
   try{mergeQr.stop();}catch(e){}
@@ -400,23 +477,13 @@ function startMergeQR(){
   {facingMode:"environment"},
   {fps:10,qrbox:250},
   text=>{
-   let success = mergeData(text);
-
-   // 成功した時だけ停止
-   if(success){
+   let ok=mergeData(text);
+   if(ok){
     mergeQr.stop();
-    btn.innerText="受信済み";
-   }else{
-    // 失敗時は再読み込み状態に戻す
-    btn.innerText="再読み込み";
-    btn.disabled=false;
+    document.getElementById("mergeBtn").innerText="受信済み";
    }
   }
- ).catch(()=>{
-  alert("カメラ起動失敗");
-  btn.disabled=false;
-  btn.innerText="① データ受信";
- });
+ );
 }
 
 // 合体
@@ -425,7 +492,7 @@ function mergeData(text){
 
  if(c!==cls||code!==voteCodeGlobal){
   alert("コードエラー");
-  return false; // ←重要
+  return false;
  }
 
  agree+=+a;
@@ -435,30 +502,21 @@ function mergeData(text){
  isMerged=true;
 
  document.getElementById("resultTitle").innerText=`${cls}集計結果`;
-
  document.getElementById("agreeNum").innerText=agree;
  document.getElementById("disagreeNum").innerText=disagree;
  document.getElementById("absentNum").innerText=absent;
-
- document.getElementById("mergeBtn").style.background="#555";
 
  let sendBtn=document.getElementById("sendBtn");
  sendBtn.style.background="#fff";
  sendBtn.style.color="#000";
  sendBtn.disabled=false;
 
- <div id="loading" style="display:none;margin-top:10px;font-size:24px;">
-送信中・・・
-</div>
-
- alert("受信完了！");
- return true; // ←成功
+ return true;
 }
 
 // 送信
 function submitData(){
-
- if(role==="child1" && !isMerged){
+ if(role==="child1"&&!isMerged){
   alert("先にデータ受信して");
   return;
  }
@@ -477,8 +535,7 @@ function submitData(){
  .then(()=>{
   loading.innerText="送信完了！";
 
-  // ホームボタン白く
-  let homeBtn=document.querySelectorAll(".qr-btn")[2];
+  let homeBtn=document.getElementById("homeBtn");
   homeBtn.style.background="#fff";
   homeBtn.style.color="#000";
 
@@ -500,4 +557,5 @@ function goHome(){
 </script>
 
 </body>
+</html>
 </html>
