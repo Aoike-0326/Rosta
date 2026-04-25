@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Rösta│v1.3.0</title>
+<title>Rösta│v1.4.0</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -67,10 +67,13 @@ body {
   border: 4px solid var(--accent);
   margin-bottom: 30px;
 }
+/* 投票開始ボタンを含む、大型ボタンの配置調整 */
 .qr-btn-large {
   font-size: 32px;
   padding: 30px 80px;
   border-radius: 20px;
+  margin-top: 60px; /* ここでボタンの上に大きな余白を作ります */
+  display: inline-block; /* 余白を確実に反映させるため */
 }
 
 /* 投票画面 - Chromebook最適化 */
@@ -181,10 +184,9 @@ input#voteCode {
 </div>
 
 <div id="codeInput" class="card" style="display:none;">
-<h2>投票コードを入力</h2>
-<input id="voteCode" type="text" placeholder="0000">
-<br>
-<button class="qr-btn qr-btn-large" onclick="startVoting()">投票開始</button>
+  <h2>投票コードを入力</h2>
+  <input id="voteCode" type="text" placeholder="0000">
+  <button class="qr-btn qr-btn-large" onclick="startVoting()">投票開始</button>
 </div>
 
 <div id="voteArea" class="card" style="display:none;">
