@@ -209,28 +209,50 @@ window.onload=()=>{
 
 // QR開始
 function startQR(){
- document.getElementById("qrBtn").style.display="none";
 
+ const btn = document.getElementById("qrBtn");
+ btn.style.display="none";
+
+ // 前のインスタンスがあれば止める
  if(html5QrCode){
   try{ html5QrCode.stop(); }catch(e){}
  }
 
- html5QrCode=new Html5Qrcode("reader");
+ html5QrCode = new Html5Qrcode("reader");
 
  html5QrCode.start(
-  {facingMode:"environment"},
-  {fps:10,qrbox:250},
-  text=>{
-   let data=JSON.parse(text);
-   cls=data.class;
-   ranges=data.ranges;
+  { facingMode: "environment" },
+  { fps: 10, qrbox: 250 },
 
-   html5QrCode.stop();
-   document.getElementById("afterScan").style.display="block";
+  text => {
+   console.log("読み取り:", text);
+
+   try{
+    let data = JSON.parse(text);
+
+    cls = data.class;
+    ranges = data.ranges;
+
+    html5QrCode.stop();
+
+    document.getElementById("afterScan").style.display="block";
+
+   }catch(e){
+    alert("QRが不正（クラスQRじゃない）");
+    console.error(e);
+
+    // ボタン復活（再チャレンジ用）
+    btn.style.display="block";
+   }
   }
- );
-}
 
+ ).catch(err=>{
+  console.error("カメラエラー", err);
+  alert("カメラ起動できない");
+
+  btn.style.display="block";
+ });
+}
 // 子機選択
 function selectRole(r){
  let target=ranges.find(x=>x.role===r);
