@@ -4,128 +4,345 @@
 <meta charset="UTF-8">
 <title>Rösta│v1.0.0</title>
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+
 <script src="https://unpkg.com/html5-qrcode"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <style>
-body{
- margin:0;
- background:#111;
- color:white;
- font-family:sans-serif;
- display:flex;
- justify-content:center;
- align-items:center;
- height:100vh;
+/* CSSを全面的にモダンなスタイルへ書き換え */
+:root {
+  --bg-color: #0f1115;
+  --card-bg: rgba(30, 33, 40, 0.7);
+  --text-main: #f3f4f6;
+  --text-sub: #9ca3af;
+  --accent: #6366f1;
+  --accent-hover: #4f46e5;
+  --agree-color: #ef4444;
+  --disagree-color: #3b82f6;
+  --absent-color: #4b5563;
+  --radius: 24px;
 }
 
-.container{
- width:100%;
- max-width:1100px;
- height:95%;
+body {
+  margin: 0;
+  background: var(--bg-color);
+  background-image: radial-gradient(circle at 50% 0%, #1f2233 0%, #0f1115 80%);
+  color: var(--text-main);
+  font-family: 'Inter', 'Noto Sans JP', sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  overflow: hidden;
 }
 
-.card{
- width:100%;
- height:100%;
- text-align:center;
- position:relative;
+.container {
+  width: 100%;
+  max-width: 600px; /* スマホ・タブレット向けに最適化 */
+  height: 95%;
+  padding: 15px;
+  box-sizing: border-box;
 }
 
-.qr-btn{
- font-size:26px;
- padding:14px 24px;
- margin:10px;
- border:none;
- border-radius:10px;
+.card {
+  background: var(--card-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius);
+  width: 100%;
+  height: 100%;
+  padding: 30px 20px;
+  box-sizing: border-box;
+  text-align: center;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
 }
 
-.vote-main{
- display:flex;
- height:60%;
+h1, h2 {
+  margin-top: 0;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.3);
 }
 
-.vote-half{
- flex:1;
- font-size:70px;
- border:none;
- transition:0.1s;
-}
-.vote-half:active{
- transform:scale(0.93);
- filter:brightness(0.8);
-}
-
-.absent{
- width:100%;
- height:120px;
- font-size:40px;
- background:#444;
- border:none;
- transition:0.1s;
-}
-.absent:active{
- transform:scale(0.93);
+.qr-btn {
+  font-size: 16px;
+  font-weight: 600;
+  padding: 16px 32px;
+  margin: 10px;
+  border: none;
+  border-radius: 14px;
+  background: var(--accent);
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
+  font-family: inherit;
+  letter-spacing: 0.05em;
 }
 
-.agree{background:#ff3b3b;}
-.disagree{background:#2f6bff;}
-
-#progress{font-size:30px;}
-#studentId{font-size:60px;font-weight:bold;}
-
-#userBar{
- position:absolute;
- top:10px;
- left:10px;
- background:#222;
- padding:10px 15px;
- border-radius:10px;
- cursor:pointer;
- display:none;
+.qr-btn:hover {
+  background: var(--accent-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
 }
 
-#dropdown{
- display:none;
- margin-top:10px;
- background:#333;
- border-radius:8px;
+.qr-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 10px rgba(99, 102, 241, 0.3);
 }
 
-.result-flex{
- display:flex;
- justify-content:space-between;
- align-items:center;
- margin-top:40px;
+.qr-btn:disabled {
+  background: #374151 !important;
+  color: #9ca3af !important;
+  box-shadow: none !important;
+  cursor: not-allowed;
+  transform: none;
 }
 
-.result-left{
- text-align:left;
- font-size:40px;
+input#voteCode {
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: white;
+  border-radius: 12px;
+  padding: 15px;
+  text-align: center;
+  outline: none;
+  transition: all 0.3s ease;
+  width: 80%;
+  max-width: 300px;
+  font-family: inherit;
+  font-weight: 600;
+  letter-spacing: 2px;
 }
 
-.result-right{
- display:flex;
- flex-direction:column;
- gap:15px;
+input#voteCode:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
 }
 
-#reader2{
- width:260px;
- height:260px;
+/* 投票画面に特化したレイアウト調整 */
+#voteArea {
+  justify-content: flex-start;
+  padding-top: 70px;
 }
 
-#qrBox{
- background:white;
- padding:10px;
+#progress {
+  font-size: 18px;
+  color: var(--text-sub);
+  margin-bottom: 5px;
+  font-weight: 600;
+  letter-spacing: 2px;
 }
- #backBtn{
- position:absolute;
- top:10px;
- left:10px;
- font-size:20px;
- padding:10px 15px;
- z-index:100;
+
+#studentId {
+  font-size: 64px;
+  font-weight: 800;
+  margin-bottom: 30px;
+  text-shadow: 0 4px 20px rgba(255,255,255,0.1);
+  letter-spacing: 2px;
+}
+
+.vote-main {
+  display: flex;
+  width: 100%;
+  gap: 15px;
+  height: 45vh;
+  margin-bottom: 15px;
+}
+
+.vote-half {
+  flex: 1;
+  font-size: 40px;
+  font-weight: 700;
+  border: none;
+  border-radius: 20px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.agree {
+  background: linear-gradient(145deg, #ff6b6b, var(--agree-color));
+}
+.disagree {
+  background: linear-gradient(145deg, #60a5fa, var(--disagree-color));
+}
+
+.vote-half:active {
+  transform: scale(0.94);
+  filter: brightness(0.9);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.absent {
+  width: 100%;
+  height: 10vh;
+  min-height: 80px;
+  font-size: 24px;
+  font-weight: 600;
+  background: var(--absent-color);
+  color: white;
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+}
+.absent:active {
+  transform: scale(0.96);
+  background: #374151;
+}
+
+/* ヘッダー・ドロップダウンメニュー */
+#userBar {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 10px 18px;
+  border-radius: 12px;
+  cursor: pointer;
+  z-index: 1000;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 0.2s;
+  display: none; /* JS制御用 */
+}
+#userBar:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+#dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  margin-top: 8px;
+  background: rgba(20, 20, 25, 0.95);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+#dropdown div {
+  padding: 15px;
+  color: #ff6b6b;
+  text-align: center;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+#dropdown div:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+/* 戻るボタン */
+#backBtn {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 18px;
+  border-radius: 12px;
+  cursor: pointer;
+  z-index: 100;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+#backBtn:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+/* 結果画面のレイアウト */
+.result-flex {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: center;
+  gap: 25px;
+  margin-top: 10px;
+}
+
+.result-left {
+  text-align: center;
+  font-size: 20px;
+  font-weight: 600;
+  background: rgba(0,0,0,0.3);
+  padding: 20px 40px;
+  border-radius: 20px;
+  width: 80%;
+  line-height: 2;
+  box-shadow: inset 0 2px 10px rgba(0,0,0,0.2);
+}
+.result-left span {
+  font-weight: 800;
+  font-size: 28px;
+  margin-left: 10px;
+}
+#agreeNum { color: #ff8787; }
+#disagreeNum { color: #74c0fc; }
+#absentNum { color: #ced4da; }
+
+.result-right {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 12px;
+}
+.result-right .qr-btn {
+  margin: 0;
+  width: 100%;
+}
+
+/* カメラ・QRコード表示エリア */
+#reader, #reader2 {
+  border-radius: 16px;
+  overflow: hidden;
+  border: 2px solid rgba(255,255,255,0.1);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+#qrBox {
+  background: white;
+  padding: 15px;
+  border-radius: 16px;
+  display: inline-block;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+@media (min-width: 768px) {
+  .result-flex {
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: stretch;
+  }
+  .result-left {
+    text-align: left;
+    width: auto;
+  }
+  .result-right {
+    width: auto;
+    min-width: 220px;
+  }
 }
 </style>
 </head>
@@ -140,7 +357,6 @@ body{
   </div>
 </div>
 
-<!-- QR -->
 <div id="setup" class="card">
 <h2>QR読み取り</h2>
 <div id="reader" style="width:300px;margin:auto;"></div>
@@ -153,15 +369,13 @@ body{
 </div>
 </div>
 
-<!-- コード -->
 <div id="codeInput" class="card" style="display:none;">
 <h2>投票コード入力</h2>
-<input id="voteCode" style="font-size:30px;">
+<input id="voteCode">
 <br>
 <button class="qr-btn" onclick="startVoting()">開始</button>
 </div>
 
-<!-- 投票 -->
 <div id="voteArea" class="card" style="display:none;">
 <button id="backBtn" onclick="goBack()">戻る</button>
 
@@ -176,7 +390,6 @@ body{
 <button class="absent" onclick="vote('欠席')">欠席</button>
 </div>
 
-<!-- 結果 -->
 <div id="resultArea" class="card" style="display:none;">
 
 <h1 id="resultTitle"></h1>
@@ -211,6 +424,7 @@ body{
 </div>
 
 <script>
+// ---------- ここから下のJavaScriptは一切変更していません ----------
 let cls="",ranges=[],role="";
 let start=1,end=0,current;
 let agree=0,disagree=0,absent=0;
