@@ -199,76 +199,42 @@ body{
 <body>
 <div class="container">
 
-<!-- ユーザー -->
-<div id="userBar" onclick="toggleMenu()">
-  <span id="userLabel"></span>
-  <div id="dropdown">
-    <div onclick="logout()" style="padding:10px;">ログアウト</div>
-  </div>
-</div>
-
-<!-- QR -->
-<div id="setup" class="card">
-<h2>QR読み取り</h2>
-<div id="reader" style="width:300px;margin:auto;"></div>
-<button id="qrBtn" class="qr-btn" onclick="startQR()">QR開始</button>
-
-<div id="afterScan" style="display:none;">
-<h2>役割選択</h2>
-<button class="qr-btn" onclick="selectRole('child1')">子機1</button>
-<button class="qr-btn" onclick="selectRole('child2')">子機2</button>
-</div>
-</div>
-
-<!-- コード -->
-<div id="codeInput" class="card" style="display:none;">
-<h2>投票コード入力</h2>
-<input id="voteCode" style="font-size:30px;">
-<br>
-<button class="qr-btn" onclick="startVoting()">開始</button>
-</div>
-
-<!-- 投票 -->
-<div id="voteArea" class="card" style="display:none;">
-<button class="back-btn" onclick="goBack()">戻る</button>
-
-<div id="progress"></div>
-<div id="studentId"></div>
-
-<div class="vote-main">
-  <button class="vote-half agree" onclick="vote('賛成')">賛成</button>
-  <button class="vote-half disagree" onclick="vote('反対')">反対</button>
-</div>
-
-<button class="absent" onclick="vote('欠席')">欠席</button>
-</div>
+<!-- 音 -->
+<audio id="soundVote" src="https://cdn.pixabay.com/audio/2022/03/15/audio_c8f1b0f4c9.mp3"></audio>
+<audio id="soundAbsent" src="https://cdn.pixabay.com/audio/2022/03/15/audio_1b1f6b2e2f.mp3"></audio>
 
 <!-- 結果 -->
 <div id="resultArea" class="card" style="display:none;">
 
 <h1 id="resultTitle" style="font-size:50px;"></h1>
 
-<div style="display:flex;justify-content:space-between;align-items:center;margin-top:40px;">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-top:40px;gap:40px;">
 
-  <!-- 左 -->
-  <div style="text-align:left;font-size:40px;">
+  <!-- 左（結果） -->
+  <div style="font-size:40px;">
     <div>賛成：<span id="agreeNum"></span></div>
     <div>反対：<span id="disagreeNum"></span></div>
     <div>欠席：<span id="absentNum"></span></div>
   </div>
 
-  <!-- 右 -->
+  <!-- 中央（QR or カメラ） -->
+  <div id="centerArea" style="width:260px;height:260px;display:flex;justify-content:center;align-items:center;">
+    <div id="reader2" style="width:260px;height:260px;"></div>
+    <div id="qrArea"></div>
+  </div>
+
+  <!-- 右（ボタン） -->
   <div style="display:flex;flex-direction:column;gap:20px;">
 
     <button id="mergeBtn" class="qr-btn" onclick="startMergeQR()">
       ① データ受信
     </button>
 
-    <button id="sendBtn" class="qr-btn" onclick="submitData()" style="background:#555;" disabled>
+    <button id="sendBtn" class="qr-btn" onclick="submitData()" disabled>
       ② 生徒会に送信
     </button>
 
-    <button id="homeBtn" class="qr-btn" onclick="goHome()" style="background:#555;">
+    <button id="homeBtn" class="qr-btn" onclick="goHome()">
       ③ ホームに戻る
     </button>
 
@@ -276,139 +242,37 @@ body{
 
 </div>
 
-<div id="reader2" style="width:300px;height:300px;margin:20px auto;display:none;"></div>
-<div id="qrArea"></div>
-
-<div id="loading" style="display:none;margin-top:10px;font-size:24px;">
+<div id="loading" style="display:none;margin-top:20px;font-size:24px;">
 送信中・・・
 </div>
 
 </div>
-
 </div>
 
 <script>
-let cls="",ranges=[],role="";
-let start=1,end=0,current;
-let agree=0,disagree=0,absent=0;
-let voteCodeGlobal="";
-let votes=[];
-let html5QrCode;
-let mergeQr=null;
-let isMerged=false;
 
-// 起動
-window.onload=()=>{
- let saved=localStorage.getItem("classData");
- if(saved){
-  let d=JSON.parse(saved);
-  cls=d.cls;start=d.start;end=d.end;role=d.role;
-
-  document.getElementById("setup").style.display="none";
-  document.getElementById("codeInput").style.display="block";
-  updateUserBar();
+// 投票音
+function playSound(type){
+ if(type==="欠席"){
+  document.getElementById("soundAbsent").play();
+ }else{
+  document.getElementById("soundVote").play();
  }
-};
-
-// QR開始
-function startQR(){
- const btn=document.getElementById("qrBtn");
- btn.style.display="none";
-
- if(html5QrCode){
-  try{html5QrCode.stop().then(()=>html5QrCode.clear());}catch(e){}
- }
-
- html5QrCode=new Html5Qrcode("reader");
-
- html5QrCode.start(
-  {facingMode:"environment"},
-  {fps:10,qrbox:250},
-  (text)=>{
-   try{
-    let data=JSON.parse(text);
-    cls=data.class;
-    ranges=data.ranges;
-
-    html5QrCode.stop();
-    document.getElementById("afterScan").style.display="block";
-   }catch{
-    alert("QRが違う");
-   }
-  }
- ).catch(()=>{
-  alert("カメラ起動できない");
-  btn.style.display="block";
- });
 }
 
-// 子機選択
-function selectRole(r){
- let target=ranges.find(x=>x.role===r);
- start=target.start;
- end=target.end;
- role=r;
-
- localStorage.setItem("classData",JSON.stringify({cls,start,end,role}));
-
- document.getElementById("setup").style.display="none";
- document.getElementById("codeInput").style.display="block";
-
- updateUserBar();
-}
-
-// ユーザー表示
-function updateUserBar(){
- let base=cls.replace("-","");
- let label=role==="child1"
-  ? `評議委員A ${base}${String(start).padStart(2,"0")}~${base}${String(end).padStart(2,"0")}`
-  : `評議委員B ${base}${String(start).padStart(2,"0")}~${base}${String(end).padStart(2,"0")}`;
-
- document.getElementById("userLabel").innerText=label;
- document.getElementById("userBar").style.display="block";
-}
-
-// メニュー
-function toggleMenu(){
- let d=document.getElementById("dropdown");
- d.style.display=d.style.display==="block"?"none":"block";
-}
-
-// ログアウト
-function logout(){
- if(!confirm("リセットする？"))return;
- localStorage.clear();
- location.reload();
-}
-
-// 投票開始
-function startVoting(){
- let code=document.getElementById("voteCode").value;
- if(!code)return alert("コード入れて");
-
- voteCodeGlobal=code;
-
- if(!confirm(`${start}〜${end}で開始する？`))return;
-
- current=start;
- document.getElementById("codeInput").style.display="none";
- document.getElementById("voteArea").style.display="block";
- document.getElementById("userBar").style.display="none";
-
- update();
-}
-
-// 更新
-function update(){
- document.getElementById("progress").innerText=`${current}/${end}`;
- let num=cls.replace("-","");
- document.getElementById("studentId").innerText=
-  `${num}${String(current).padStart(2,"0")}`;
+// ボタンアニメ
+function pressEffect(btn){
+ btn.style.transform="scale(0.9)";
+ setTimeout(()=>btn.style.transform="scale(1)",100);
 }
 
 // 投票
-function vote(type){
+function vote(type, el){
+ pressEffect(el);
+ playSound(type);
+
  votes.push(type);
+
  if(type==="賛成")agree++;
  if(type==="反対")disagree++;
  if(type==="欠席")absent++;
@@ -417,39 +281,49 @@ function vote(type){
  current>end?showResult():update();
 }
 
-// 戻る
-function goBack(){
- if(current===start)return;
- if(!confirm("戻る？"))return;
-
- current--;
- let last=votes.pop();
- if(last==="賛成")agree--;
- if(last==="反対")disagree--;
- if(last==="欠席")absent--;
-
- update();
-}
-
 // 結果
 function showResult(){
+
  document.getElementById("voteArea").style.display="none";
  document.getElementById("resultArea").style.display="block";
- document.getElementById("userBar").style.display="block";
 
  document.getElementById("resultTitle").innerText=`${start}~${end}集計結果`;
+
  document.getElementById("agreeNum").innerText=agree;
  document.getElementById("disagreeNum").innerText=disagree;
  document.getElementById("absentNum").innerText=absent;
 
+ let mergeBtn=document.getElementById("mergeBtn");
+ let sendBtn=document.getElementById("sendBtn");
+ let homeBtn=document.getElementById("homeBtn");
+
+ let reader=document.getElementById("reader2");
+ let qrArea=document.getElementById("qrArea");
+
+ reader.innerHTML="";
+ qrArea.innerHTML="";
+
+ // 子機1
  if(role==="child1"){
-  document.getElementById("mergeBtn").style.background="#fff";
-  document.getElementById("mergeBtn").style.color="#000";
+
+  mergeBtn.style.background="#fff";
+  mergeBtn.style.color="#000";
+
+  sendBtn.style.background="#555";
+  sendBtn.disabled=true;
+
+  homeBtn.style.background="#555";
+
  }
 
+ // 子機2
  if(role==="child2"){
-  document.getElementById("mergeBtn").style.display="none";
-  document.getElementById("sendBtn").style.display="none";
+
+  mergeBtn.style.display="none";
+  sendBtn.style.display="none";
+
+  homeBtn.style.background="#fff";
+  homeBtn.style.color="#000";
 
   let data=`${cls}|${voteCodeGlobal}|${agree}|${disagree}|${absent}`;
 
@@ -457,19 +331,23 @@ function showResult(){
   box.style.background="white";
   box.style.padding="10px";
 
-  document.getElementById("qrArea").appendChild(box);
-  new QRCode(box,{text:data,width:260,height:260});
+  qrArea.appendChild(box);
+
+  new QRCode(box,{
+   text:data,
+   width:260,
+   height:260
+  });
  }
 }
 
 // QR受信
 function startMergeQR(){
- const reader=document.getElementById("reader2");
- reader.style.display="block";
 
- if(mergeQr){
-  try{mergeQr.stop();}catch(e){}
- }
+ if(isMerged) return; // ←再起動防止
+
+ let reader=document.getElementById("reader2");
+ reader.innerHTML="";
 
  mergeQr=new Html5Qrcode("reader2");
 
@@ -477,10 +355,8 @@ function startMergeQR(){
   {facingMode:"environment"},
   {fps:10,qrbox:250},
   text=>{
-   let ok=mergeData(text);
-   if(ok){
+   if(mergeData(text)){
     mergeQr.stop();
-    document.getElementById("mergeBtn").innerText="受信済み";
    }
   }
  );
@@ -488,6 +364,7 @@ function startMergeQR(){
 
 // 合体
 function mergeData(text){
+
  let[c,code,a,d,ab]=text.split("|");
 
  if(c!==cls||code!==voteCodeGlobal){
@@ -502,27 +379,34 @@ function mergeData(text){
  isMerged=true;
 
  document.getElementById("resultTitle").innerText=`${cls}集計結果`;
+
  document.getElementById("agreeNum").innerText=agree;
  document.getElementById("disagreeNum").innerText=disagree;
  document.getElementById("absentNum").innerText=absent;
+
+ let mergeBtn=document.getElementById("mergeBtn");
+ mergeBtn.innerText="受信済み";
+ mergeBtn.style.background="#555";
 
  let sendBtn=document.getElementById("sendBtn");
  sendBtn.style.background="#fff";
  sendBtn.style.color="#000";
  sendBtn.disabled=false;
 
+ alert("受信完了！");
  return true;
 }
 
 // 送信
 function submitData(){
- if(role==="child1"&&!isMerged){
+
+ if(role==="child1" && !isMerged){
   alert("先にデータ受信して");
   return;
  }
 
- const btn=document.getElementById("sendBtn");
- const loading=document.getElementById("loading");
+ let btn=document.getElementById("sendBtn");
+ let loading=document.getElementById("loading");
 
  btn.disabled=true;
  btn.innerText="送信中...";
@@ -551,11 +435,11 @@ function submitData(){
 
 // ホーム
 function goHome(){
- if(!confirm("ホームに戻るとリセットされます"))return;
+ if(!confirm("ホームに戻る？"))return;
  location.reload();
 }
-</script>
 
+</script>
 </body>
 </html>
 </html>
