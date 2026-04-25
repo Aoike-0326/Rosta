@@ -197,8 +197,6 @@ body{
 <button id="sendBtn" class="qr-btn" onclick="submitData()" disabled style="background:#555;">
 ② 生徒会に送信
 </button>
-② 生徒会に送信
-</button>
 
 <button id="homeBtn" class="qr-btn" onclick="goHome()" style="background:#555;">
 ③ ホームに戻る
@@ -408,9 +406,7 @@ function startMergeQR(){
 function submitData(){
 
  const btn = document.getElementById("sendBtn");
- const loading = document.getElementById("loading");
 
- // 子機1以外NG
  if(role !== "child1"){
   alert("この端末では送信できません");
   return;
@@ -421,8 +417,9 @@ function submitData(){
   return;
  }
 
+ // 🔄 送信中UI
  btn.disabled = true;
- loading.style.display = "block";
+ btn.innerText = "送信中...";
 
  fetch("https://script.google.com/macros/s/AKfycbysO_2h1MkXY4s7DY4zHXJe0CddhAkCrgoS9WEZNiOgcqfx1H9sfR2I-GU6YkY8ec6C6Q/exec",{
   method:"POST",
@@ -435,18 +432,21 @@ function submitData(){
   })
  })
  .then(()=>{
-  loading.innerText="送信完了";
+  // ✅ 成功
+  btn.innerText = "送信済み！";
+  btn.style.background = "#555";
 
   const homeBtn = document.getElementById("homeBtn");
-  homeBtn.style.background="#fff";
-  homeBtn.style.color="#000";
+  homeBtn.style.background = "#fff";
+  homeBtn.style.color = "#000";
 
   alert("送信成功");
  })
- .catch((e)=>{
-  console.error(e); // ←これ追加重要
+ .catch(()=>{
+  // ❌ 失敗
+  btn.innerText = "② 生徒会に送信";
+  btn.disabled = false;
   alert("送信失敗");
-  btn.disabled=false;
  });
 }
 function goHome(){
