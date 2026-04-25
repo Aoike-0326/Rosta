@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Rösta│３</title>
+<title>Rösta│4</title>
 
 <script src="https://unpkg.com/html5-qrcode"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -326,26 +326,50 @@ function showResult(){
  document.getElementById("resultArea").style.display="block";
  document.getElementById("userBar").style.display="block";
 
+ // タイトル
  document.getElementById("resultTitle").innerText=`${start}~${end}集計結果`;
 
+ // 数字表示
  document.getElementById("agreeNum").innerText=agree;
  document.getElementById("disagreeNum").innerText=disagree;
  document.getElementById("absentNum").innerText=absent;
 
+ // 子機1
  if(role==="child1"){
+  document.getElementById("mergeBtn").style.display="block";
   document.getElementById("mergeBtn").style.background="#fff";
   document.getElementById("mergeBtn").style.color="#000";
- }else{
-  document.getElementById("mergeBtn").style.display="none";
 
+  // 送信ボタンは最初無効
+  let sendBtn=document.getElementById("sendBtn");
+  sendBtn.style.background="#555";
+  sendBtn.style.color="#fff";
+  sendBtn.disabled=true;
+ }
+
+ // 子機2
+ if(role==="child2"){
+
+  // ボタン非表示
+  document.getElementById("mergeBtn").style.display="none";
+  document.getElementById("sendBtn").style.display="none";
+
+  // QR表示
   let data=`${cls}|${voteCodeGlobal}|${agree}|${disagree}|${absent}`;
 
   let box=document.createElement("div");
   box.style.background="white";
   box.style.padding="10px";
+  box.style.marginTop="30px";
+
+  document.getElementById("qrArea").innerHTML="";
   document.getElementById("qrArea").appendChild(box);
 
-  new QRCode(box,{text:data,width:250,height:250});
+  new QRCode(box,{
+   text:data,
+   width:260,
+   height:260
+  });
  }
 }
 
@@ -370,9 +394,17 @@ function startMergeQR(){
   {facingMode:"environment"},
   {fps:10,qrbox:250},
   text=>{
-   mergeData(text);
-   mergeQr.stop();
-   btn.innerText="受信済み";
+   let success = mergeData(text);
+
+   // 成功した時だけ停止
+   if(success){
+    mergeQr.stop();
+    btn.innerText="受信済み";
+   }else{
+    // 失敗時は再読み込み状態に戻す
+    btn.innerText="再読み込み";
+    btn.disabled=false;
+   }
   }
  ).catch(()=>{
   alert("カメラ起動失敗");
@@ -387,7 +419,7 @@ function mergeData(text){
 
  if(c!==cls||code!==voteCodeGlobal){
   alert("コードエラー");
-  return;
+  return false; // ←重要
  }
 
  agree+=+a;
@@ -409,20 +441,49 @@ function mergeData(text){
  sendBtn.style.color="#000";
  sendBtn.disabled=false;
 
+ <div id="loading" style="display:none;margin-top:10px;font-size:24px;">
+送信中・・・
+</div>
+
  alert("受信完了！");
+ return true; // ←成功
 }
 
 // 送信
 function submitData(){
+
  if(role==="child1" && !isMerged){
   alert("先にデータ受信して");
   return;
  }
 
+ const btn=document.getElementById("sendBtn");
+ const loading=document.getElementById("loading");
+
+ btn.disabled=true;
+ btn.innerText="送信中...";
+ loading.style.display="block";
+
  fetch("https://script.google.com/macros/s/AKfycbysO_2h1MkXY4s7DY4zHXJe0CddhAkCrgoS9WEZNiOgcqfx1H9sfR2I-GU6YkY8ec6C6Q/exec",{
   method:"POST",
   body:JSON.stringify({class:cls,code:voteCodeGlobal,agree,disagree,absent})
- }).then(()=>alert("送信成功"));
+ })
+ .then(()=>{
+  loading.innerText="送信完了！";
+
+  // ホームボタン白く
+  let homeBtn=document.querySelectorAll(".qr-btn")[2];
+  homeBtn.style.background="#fff";
+  homeBtn.style.color="#000";
+
+  alert("送信成功");
+ })
+ .catch(()=>{
+  alert("送信失敗");
+  btn.disabled=false;
+  btn.innerText="② 生徒会に送信";
+  loading.style.display="none";
+ });
 }
 
 // ホーム
