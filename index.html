@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Rösta│完成版2</title>
+<title>Rösta│v1.0.0</title>
 
 <script src="https://unpkg.com/html5-qrcode"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -148,8 +148,8 @@ body{
 
 <div id="afterScan" style="display:none;">
 <h2>役割選択</h2>
-<button class="qr-btn" onclick="selectRole('child1')">子機1</button>
-<button class="qr-btn" onclick="selectRole('child2')">子機2</button>
+<button class="qr-btn" onclick="selectRole('child1')">評議委員A</button>
+<button class="qr-btn" onclick="selectRole('child2')">評議委員B</button>
 </div>
 </div>
 
@@ -226,8 +226,8 @@ window.onload=()=>{
   let d=JSON.parse(saved);
   cls=d.cls;start=d.start;end=d.end;role=d.role;
 
-  setup.style.display="none";
-  codeInput.style.display="block";
+  document.getElementById("setup").style.display="none";
+document.getElementById("codeInput").style.display="block";
   updateUserBar();
  }
 };
@@ -277,14 +277,14 @@ function toggleMenu(){
 }
 
 function logout(){
- if(!confirm("リセットする？"))return;
+ if(!confirm("ログアウトしますか？ログアウトすると今までのデータがリセットされます。"))return;
  localStorage.clear();
  location.reload();
 }
 
 function startVoting(){
  let code=voteCode.value;
- if(!code)return alert("コード入れて");
+ if(!code)return alert("投票コードが記入されていません。");
 
  voteCodeGlobal=code;
 
@@ -317,7 +317,7 @@ function vote(type){
 
 function goBack(){
  if(current===start)return;
- if(!confirm("戻る？"))return;
+ if(!confirm("前の投票に戻りますか？"))return;
 
  current--;
  let last=votes.pop();
@@ -413,7 +413,7 @@ function submitData(){
  }
 
  if(!isMerged){
-  alert("先にデータ受信して");
+  alert("先にデータ受信してください");
   return;
  }
 
@@ -450,7 +450,7 @@ function submitData(){
  });
 }
 function goHome(){
- if(!confirm("ホームに戻ると現在のデータは消えます。本当に戻る？")) return;
+ if(!confirm("ホームに戻ると現在のデータは消えます。本当に戻りますか？")) return;
  location.reload();
 }
 
