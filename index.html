@@ -450,9 +450,20 @@ function submitData(){
  });
 }
 function goHome(){
- if(!confirm("戻る？"))return;
+ if(!confirm("ホームに戻ると現在のデータは消えます。本当に戻る？")) return;
  location.reload();
 }
+
+ window.addEventListener("beforeunload", function (e) {
+
+ // 投票中だけ発動させる
+ if(document.getElementById("voteArea").style.display === "block"){
+
+  e.preventDefault();
+  e.returnValue = "";
+ }
+
+});
 </script>
 
 </body>
