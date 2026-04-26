@@ -275,33 +275,22 @@ input#voteCode {
 </div>
 
 <script>
-
-let cls="",ranges=[],role="";
-let start=1,end=0,current;
-let agree=0,disagree=0,absent=0;
+// --- 変数定義 ---
+let cls="", ranges=[], role="";
+let start=1, end=0, current;
+let agree=0, disagree=0, absent=0;
 let voteCodeGlobal="";
 let votes=[];
 let html5QrCode;
 let mergeQr;
 let isMerged=false;
 
-// 変数定義
-let cls="",ranges=[],role="";
-let start=1,end=0,current;
-let agree=0,disagree=0,absent=0;
-let voteCodeGlobal="";
-let votes=[];
-let html5QrCode;
-let mergeQr;
-let isMerged=false;
-
-// 1. 音源を定義（ここではまだロードを完了させない）
+// --- 1. 音源の定義 ---
 const soundAgree = new Audio('1.mp3');
 const soundAbsent = new Audio('2.mp3');
 
-// 2. ブラウザの音出し制限を解除する関数
+// --- 2. ブラウザの音出し制限を解除する関数 ---
 function unlockAudio() {
-    // 空の音を再生して「このサイトは音を出しますよ」とブラウザに認識させる
     soundAgree.play().then(() => {
         soundAgree.pause();
         soundAgree.currentTime = 0;
@@ -313,254 +302,207 @@ function unlockAudio() {
     }).catch(e => console.log("Audio unlock wait..."));
 }
 
-// スキャン開始ボタンや役割選択ボタンの処理に unlockAudio() を仕込む
+// --- 3. スキャン開始 (カメラ起動) ---
 function startQR(){
   unlockAudio(); // ここで音を「解凍」
   document.getElementById("qrBtn").style.display="none";
-  // ...以下、元のstartQRの処理...
-  html5QrCode=new Html5Qrcode("reader");
+  
+  html5QrCode = new Html5Qrcode("reader");
   html5QrCode.start(
-    {facingMode:"environment"},
-    {fps:10,qrbox:300},
-    text=>{
-      let data=JSON.parse(text);
-      cls=data.class;
-      ranges=data.ranges;
+    { facingMode: "environment" },
+    { fps: 10, qrbox: 300 },
+    text => {
+      let data = JSON.parse(text);
+      cls = data.class;
+      ranges = data.ranges;
       html5QrCode.stop().then(() => {
-        document.getElementById("reader").style.display="none";
-        document.getElementById("setupTitle").innerText="役割を選択してください";
-        afterScan.style.display="block";
+        document.getElementById("reader").style.display = "none";
+        document.getElementById("setupTitle").innerText = "役割を選択してください";
+        document.getElementById("afterScan").style.display = "block";
       });
     }
-  ).catch(()=>alert("カメラ起動失敗"));
+  ).catch(err => {
+    console.error(err);
+    alert("カメラ起動失敗。権限を確認してください。");
+  });
 }
 
+// --- 4. 投票アクション (音＋カウント) ---
 function vote(type){
-  // 3. 再生処理
+  // 再生処理
   if(type === "欠席") {
     soundAbsent.currentTime = 0;
-    soundAbsent.play();
+    soundAbsent.play().catch(e => console.log(e));
   } else {
     soundAgree.currentTime = 0;
-    soundAgree.play();
+    soundAgree.play().catch(e => console.log(e));
   }
 
   votes.push(type);
-  if(type==="賛成") agree++;
-  if(type==="反対") disagree++;
-  if(type==="欠席") absent++;
+  if(type === "賛成") agree++;
+  if(type === "反対") disagree++;
+  if(type === "欠席") absent++;
   
   current++;
   current > end ? showResult() : update();
 }
 
-window.onload=()=>{
- let saved=localStorage.getItem("classData");
- if(saved){
-  let d=JSON.parse(saved);
-  cls=d.cls;start=d.start;end=d.end;role=d.role;
-  setup.style.display="none";
-  codeInput.style.display="block";
-  updateUserBar();
- }
+// --- 5. その他 補助関数 ---
+
+window.onload = () => {
+  let saved = localStorage.getItem("classData");
+  if(saved){
+    let d = JSON.parse(saved);
+    cls = d.cls; start = d.start; end = d.end; role = d.role;
+    document.getElementById("setup").style.display = "none";
+    document.getElementById("codeInput").style.display = "block";
+    updateUserBar();
+  }
 };
 
-function startQR(){
- document.getElementById("qrBtn").style.display="none";
- html5QrCode=new Html5Qrcode("reader");
- html5QrCode.start(
-  {facingMode:"environment"},
-  {fps:10,qrbox:300},
-  text=>{
-   let data=JSON.parse(text);
-   cls=data.class;
-   ranges=data.ranges;
-   html5QrCode.stop().then(() => {
-     document.getElementById("reader").style.display="none";
-     document.getElementById("setupTitle").innerText="役割を選択してください";
-     afterScan.style.display="block";
-   });
-  }
- ).catch(()=>alert("カメラ起動失敗"));
-}
-
 function selectRole(r){
- let t=ranges.find(x=>x.role===r);
- start=t.start; end=t.end; role=r;
- localStorage.setItem("classData",JSON.stringify({cls,start,end,role}));
- setup.style.display="none";
- codeInput.style.display="block";
- updateUserBar();
+  let t = ranges.find(x => x.role === r);
+  start = t.start; end = t.end; role = r;
+  localStorage.setItem("classData", JSON.stringify({cls, start, end, role}));
+  document.getElementById("setup").style.display = "none";
+  document.getElementById("codeInput").style.display = "block";
+  updateUserBar();
 }
 
-// 修正点：ラベル表示のロジック
 function updateUserBar(){
- let num=cls.replace("-","");
- let startId = `${num}${String(start).padStart(2,"0")}`;
- let endId = `${num}${String(end).padStart(2,"0")}`;
- 
- userLabel.innerText= role==="child1" ? `評議委員A: ${startId} ~ ${endId}` : `評議委員B: ${startId} ~ ${endId}`;
- userBar.style.display="block";
-}
-
-function toggleMenu(){
- let dp = document.getElementById("dropdown");
- dp.style.display= dp.style.display==="block"?"none":"block";
-}
-
-function logout(){
- if(!confirm("ログアウトしますか？"))return;
- localStorage.clear();
- location.reload();
+  let num = cls.replace("-","");
+  let startId = `${num}${String(start).padStart(2,"0")}`;
+  let endId = `${num}${String(end).padStart(2,"0")}`;
+  document.getElementById("userLabel").innerText = role === "child1" ? `評議委員A: ${startId} ~ ${endId}` : `評議委員B: ${startId} ~ ${endId}`;
+  document.getElementById("userBar").style.display = "block";
 }
 
 function startVoting(){
-  let code = voteCode.value;
-  
-  // 1. 未入力チェック
+  let code = document.getElementById("voteCode").value;
   if(!code) return alert("投票コードを入力してください");
-  
-  // 2. 許可されたコードのリスト
   const allowedCodes = ["0248", "8931", "2410", "1012", "3261", "7214", "0000"];
-  
-  // 3. 入力されたコードがリストにあるか確認
   if(!allowedCodes.includes(code)) {
-    alert("エラー：無効な投票コードです。正しく入力してください。");
-    voteCode.value = ""; // 入力をリセット
+    alert("エラー：無効な投票コードです。");
+    document.getElementById("voteCode").value = "";
     return;
   }
-  
-  // 4. 以降、正しい場合の処理
   voteCodeGlobal = code;
   if(!confirm(`${start}番から${end}番まで開始しますか？`)) return;
   current = start;
-  codeInput.style.display = "none";
-  voteArea.style.display = "block";
-  userBar.style.display = "none";
+  document.getElementById("codeInput").style.display = "none";
+  document.getElementById("voteArea").style.display = "block";
+  document.getElementById("userBar").style.display = "none";
   update();
 }
 
 function update(){
- progress.innerText=`${current} / ${end}`;
- let num=cls.replace("-","");
- studentId.innerText= `${num}${String(current).padStart(2,"0")}`;
-}
-
-function vote(type){
- votes.push(type);
- if(type==="賛成")agree++;
- if(type==="反対")disagree++;
- if(type==="欠席")absent++;
- current++;
- current>end?showResult():update();
+  document.getElementById("progress").innerText = `${current} / ${end}`;
+  let num = cls.replace("-","");
+  document.getElementById("studentId").innerText = `${num}${String(current).padStart(2,"0")}`;
 }
 
 function goBack(){
- if(current===start)return;
- if(!confirm("１つ前の投票に戻りますか？"))return;
- current--;
- let last=votes.pop();
- if(last==="賛成")agree--;
- if(last==="反対")disagree--;
- if(last==="欠席")absent--;
- update();
+  if(current === start) return;
+  if(!confirm("１つ前の投票に戻りますか？")) return;
+  current--;
+  let last = votes.pop();
+  if(last === "賛成") agree--;
+  if(last === "反対") disagree--;
+  if(last === "欠席") absent--;
+  update();
 }
 
 function showResult(){
- voteArea.style.display="none";
- resultArea.style.display="block";
- userBar.style.display="block";
- resultTitle.innerText=`集計結果 (${cls})`;
- agreeNum.innerText=agree;
- disagreeNum.innerText=disagree;
- absentNum.innerText=absent;
+  document.getElementById("voteArea").style.display = "none";
+  document.getElementById("resultArea").style.display = "block";
+  document.getElementById("userBar").style.display = "block";
+  document.getElementById("resultTitle").innerText = `集計結果 (${cls})`;
+  document.getElementById("agreeNum").innerText = agree;
+  document.getElementById("disagreeNum").innerText = disagree;
+  document.getElementById("absentNum").innerText = absent;
 
- let center=document.getElementById("centerArea");
- center.innerHTML="";
-
- if(role==="child1"){
-  let reader=document.createElement("div");
-  reader.id="reader2";
-  center.appendChild(reader);
-  mergeBtn.onclick=startMergeQR;
- }
-
- if(role==="child2"){
-  let box=document.createElement("div");
-  box.id="qrBox";
-  box.style.background="white";
-  box.style.padding="20px";
-  box.style.borderRadius="20px";
-  center.appendChild(box);
-  new QRCode(box,{
-   text:`${cls}|${voteCodeGlobal}|${agree}|${disagree}|${absent}`,
-   width:300,height:300
-  });
-  mergeBtn.style.display="none";
-  sendBtn.style.display="none";
-  homeBtn.style.background="#fff";
-  homeBtn.style.color="#000";
- }
+  let center = document.getElementById("centerArea");
+  center.innerHTML = "";
+  if(role === "child1"){
+    let reader = document.createElement("div");
+    reader.id = "reader2";
+    center.appendChild(reader);
+    document.getElementById("mergeBtn").onclick = startMergeQR;
+  } else {
+    let box = document.createElement("div");
+    box.id = "qrBox";
+    box.style.background = "white";
+    box.style.padding = "20px";
+    box.style.borderRadius = "20px";
+    center.appendChild(box);
+    new QRCode(box, { text: `${cls}|${voteCodeGlobal}|${agree}|${disagree}|${absent}`, width: 300, height: 300 });
+    document.getElementById("mergeBtn").style.display = "none";
+    document.getElementById("sendBtn").style.display = "none";
+    document.getElementById("homeBtn").style.background = "#fff";
+    document.getElementById("homeBtn").style.color = "#000";
+  }
 }
 
 function startMergeQR(){
- if(isMerged)return;
- mergeQr=new Html5Qrcode("reader2");
- mergeQr.start({facingMode:"environment"},{fps:10,qrbox:250},
- text=>{
-  let [c,code,a,d,ab]=text.split("|");
-  if(c!==cls||code!==voteCodeGlobal){
-   alert("データ不一致");
-   return;
-  }
-  mergeQr.stop().then(() => {
-    document.getElementById("reader2").style.display="none";
-    agree+=+a; disagree+=+d; absent+=+ab;
-    agreeNum.innerText=agree; disagreeNum.innerText=disagree; absentNum.innerText=absent;
-    isMerged=true;
-    sendBtn.disabled=false;
-    sendBtn.style.background="var(--accent)";
-    mergeBtn.style.display="none";
-    alert("同期完了");
+  if(isMerged) return;
+  mergeQr = new Html5Qrcode("reader2");
+  mergeQr.start({facingMode: "environment"}, {fps: 10, qrbox: 250}, text => {
+    let [c, code, a, d, ab] = text.split("|");
+    if(c !== cls || code !== voteCodeGlobal) return alert("データ不一致");
+    mergeQr.stop().then(() => {
+      document.getElementById("reader2").style.display = "none";
+      agree += +a; disagree += +d; absent += +ab;
+      document.getElementById("agreeNum").innerText = agree;
+      document.getElementById("disagreeNum").innerText = disagree;
+      document.getElementById("absentNum").innerText = absent;
+      isMerged = true;
+      let btn = document.getElementById("sendBtn");
+      btn.disabled = false;
+      btn.style.background = "var(--accent)";
+      document.getElementById("mergeBtn").style.display = "none";
+      alert("同期完了");
+    });
   });
- });
 }
 
 function submitData(){
- const btn = document.getElementById("sendBtn");
- if(role !== "child1") return;
- if(!isMerged) return;
-
- btn.disabled = true;
- btn.innerText = "送信中...";
-
- fetch("https://script.google.com/macros/s/AKfycbysO_2h1MkXY4s7DY4zHXJe0CddhAkCrgoS9WEZNiOgcqfx1H9sfR2I-GU6YkY8ec6C6Q/exec",{
-  method:"POST",
-  body:JSON.stringify({ class:cls, code:voteCodeGlobal, agree, disagree, absent })
- })
- .then(()=>{
-  btn.innerText = "送信完了";
-  btn.style.background = "#222";
-  document.getElementById("homeBtn").style.background = "#fff";
-  document.getElementById("homeBtn").style.color = "#000";
-  alert("送信成功");
- })
- .catch(()=>{
-  btn.innerText = "送信失敗";
-  btn.disabled = false;
-  alert("送信失敗");
- });
+  const btn = document.getElementById("sendBtn");
+  if(role !== "child1" || !isMerged) return;
+  btn.disabled = true;
+  btn.innerText = "送信中...";
+  fetch("https://script.google.com/macros/s/AKfycbysO_2h1MkXY4s7DY4zHXJe0CddhAkCrgoS9WEZNiOgcqfx1H9sfR2I-GU6YkY8ec6C6Q/exec", {
+    method: "POST",
+    body: JSON.stringify({ class: cls, code: voteCodeGlobal, agree, disagree, absent })
+  }).then(() => {
+    btn.innerText = "送信完了";
+    btn.style.background = "#222";
+    document.getElementById("homeBtn").style.background = "#fff";
+    document.getElementById("homeBtn").style.color = "#000";
+    alert("送信成功");
+  }).catch(() => {
+    btn.innerText = "送信失敗";
+    btn.disabled = false;
+    alert("送信失敗");
+  });
 }
 
 function goHome(){
- if(!confirm("ホームに戻りますか？")) return;
- location.reload();
+  if(confirm("ホームに戻りますか？")) location.reload();
 }
 
-window.addEventListener("beforeunload", function (e) {
- if(document.getElementById("voteArea").style.display === "block"){
-  e.preventDefault(); e.returnValue = "";
- }
+function toggleMenu(){
+  let dp = document.getElementById("dropdown");
+  dp.style.display = dp.style.display === "block" ? "none" : "block";
+}
+
+function logout(){
+  if(confirm("ログアウトしますか？")){ localStorage.clear(); location.reload(); }
+}
+
+window.addEventListener("beforeunload", (e) => {
+  if(document.getElementById("voteArea").style.display === "block"){
+    e.preventDefault(); e.returnValue = "";
+  }
 });
 
 </script>
