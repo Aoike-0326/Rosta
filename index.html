@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Rösta│v1.5.0</title>
+<title>Rösta│v1.6.0</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -77,31 +77,31 @@ body {
 }
 
 /* 投票画面 - Chromebook最適化 */
-/* --- ここから置き換え --- */
 #voteArea { 
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  height: 100%; /* 画面の縦をフルに使う */
+  justify-content: flex-start; /* 上から詰める */
+  height: 100vh; /* 画面の縦幅いっぱい */
   padding: 20px 40px; 
   box-sizing: border-box;
 }
 
-#progress { font-size: 28px; color: var(--text-sub); letter-spacing: 0.3em; margin-bottom: 10px; }
+#progress { font-size: 28px; color: var(--text-sub); letter-spacing: 0.3em; margin-bottom: 5px; }
 #studentId { font-size: 110px; font-weight: 800; margin: 0; letter-spacing: 0.1em; }
 
 .vote-main {
   display: flex;
   width: 100%;
-  flex: 1; /* これで賛成・反対ボタンが縦に伸びます */
+  flex: 1;           /* ここが重要：残りの縦幅をすべて賛成・反対に割り当てる */
   gap: 30px;
-  margin: 20px 0;
+  margin-top: 10px;
+  margin-bottom: 20px; /* 欠席ボタンとの隙間を最小限に */
 }
 
 .vote-half {
   flex: 1;
-  height: 100%; /* 親の高さ一杯まで拡大 */
-  font-size: 120px; /* 文字をさらに巨大化 */
+  height: 100%;      /* 親要素（vote-main）の高さ一杯まで広がる */
+  font-size: 120px; 
   font-weight: 800;
   border: none;
   border-radius: 40px;
@@ -115,15 +115,19 @@ body {
   justify-content: center;
 }
 
-/* 投票コード入力画面のボタンを下に配置 */
-#codeInput .qr-btn-large {
-  display: block;    /* 横並びを防いで下に配置 */
-  margin: 80px auto 0; /* 上に大きな余白(80px)を作って中央配置 */
-  font-size: 32px;
-  padding: 30px 100px;
-  border-radius: 20px;
+.absent {
+  width: 100%;
+  height: 160px;     /* 欠席ボタンも少し大きくして押しやすく */
+  font-size: 40px;
+  font-weight: 700;
+  background: var(--absent-color);
+  color: white;
+  border: none;
+  border-radius: 24px;
+  cursor: pointer;
+  flex-shrink: 0;    /* 賛成・反対ボタンに押し潰されないように固定 */
+  margin-bottom: 20px; /* 画面最下部との隙間 */
 }
-/* --- ここまで --- */
 
 .agree { background: linear-gradient(145deg, #ff6b6b, var(--agree-color)); }
 .disagree { background: linear-gradient(145deg, #60a5fa, var(--disagree-color)); }
