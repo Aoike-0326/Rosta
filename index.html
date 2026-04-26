@@ -77,36 +77,18 @@ body {
 }
 
 /* 投票画面 - Chromebook最適化 */
-#voteArea { 
+#voteArea {
+  justify-content: flex-start;
+  height: 100vh; /* 画面の高さ自体を100%にする */
   display: flex;
   flex-direction: column;
-  height: 100vh; /* 画面の高さを100%固定 */
-  padding: 20px 40px; 
-  box-sizing: border-box;
-  justify-content: space-between; /* 要素を上下に分散 */
 }
 
-#progress { 
-  font-size: 24px; 
-  color: var(--text-sub); 
-  margin-bottom: 5px;
-}
-
-#studentId { 
-  font-size: 110px; 
-  font-weight: 800; 
-  margin: 0 0 10px 0;
-}
-
-/* 賛成・反対ボタンのエリア */
 .vote-main {
-  display: flex;
-   height: 65vh;
+  flex-grow: 1.5;
+  display: flex; /* ボタンを横並びにするため */
+  align-items: stretch; /* 中身のボタンを縦に引き伸ばす */
 }
-  width: 100%;
-  flex-grow: 3;      /* 可能な限りの縦幅をすべて奪う */
-  gap: 30px;
-  margin-bottom: 20px; /* 欠席ボタンとの間の隙間 */
 }
 
 .vote-half {
