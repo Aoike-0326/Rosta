@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Rösta│v2.18.0</title>
+<title>Rösta│v2.19.0</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -77,59 +77,31 @@ body {
 }
 
 /* 投票画面 - Chromebook最適化 */
-#voteArea { 
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  padding: 40px; /* 全体の余白を少し広めに */
-  box-sizing: border-box;
-  justify-content:flex-start; 
+#voteArea {
+  /* 親要素の「中央寄せ」ルールを無視させる */
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important; /* すべてを上に詰める */
+  padding-top: 20px !important;
+  height: 100vh !important;
 }
 
-#studentId { 
-  font-size: 110px; 
-  font-weight: 800; 
-  margin: 0;
+#studentId {
+  margin-bottom: 10px !important; /* IDの下の隙間を最小に */
 }
 
 .vote-main {
-  display: flex;
-  width: 100%;
-  justify-content: center; /* ボタンを中央に寄せる */
-  gap: 30px;
-  /* ▽ 縦幅の目安：ここを調整するとボタンの高さが変わります */
-  height: 450px; 
-  flex-grow: 0; /* 勝手に伸びすぎないように固定 */
-}
-
-.vote-half {
-  /* ▽ 正方形に近づけるための設定 */
-  aspect-ratio: 2 / 1; /* 縦横比を 1:1 (正方形) に指定 */
-  height: 65%;       /* 上記の height: 450px に合わせる */
-  
-  font-size: 100px;
-  font-weight: 800;
-  border: none;
-  border-radius: 50px;
-  color: white;
-  cursor: pointer;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: stretch !important;
+  flex-grow: 0 !important; /* 勝手に広がらないようにする */
+  height: 400px;           /* ◀ボタンの高さ。ここでお好みのサイズに固定 */
+  margin-bottom: 10px !important; /* ◀【重要】これと下の欠席ボタンの距離を詰める */
 }
 
 .absent {
-  width: 100%;
-  max-width: 940px; /* 賛成・反対ボタンの幅と合わせる（必要に応じて調整） */
-  height: 140px;
-  font-size: 40px;
-  font-weight: 700;
-  background: var(--absent-color);
-  color: white;
-  border: none;
-  border-radius: 24px;
-  margin: 0 auto; /* 中央配置 */
+  margin-top: 0 !important; /* 欠席ボタンの上の余白をゼロにする */
+  height: 120px;            /* 欠席ボタンの高さ */
 }
   
 .agree { background: linear-gradient(145deg, #ff6b6b, var(--agree-color)); }
