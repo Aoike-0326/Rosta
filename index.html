@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Rösta│v2.10.0</title>
+<title>Rösta│v2.11.0</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -77,46 +77,59 @@ body {
 }
 
 /* 投票画面 - Chromebook最適化 */
-#voteArea {
-  justify-content: flex-start;
-  height: 100vh; /* 画面の高さ自体を100%にする */
+#voteArea { 
   display: flex;
   flex-direction: column;
+  height: 100vh;
+  padding: 40px; /* 全体の余白を少し広めに */
+  box-sizing: border-box;
+  justify-content: space-around; /* 要素をバランスよく配置 */
+}
+
+#studentId { 
+  font-size: 110px; 
+  font-weight: 800; 
+  margin: 0;
 }
 
 .vote-main {
-  flex-grow: 1.5;
-  display: flex; /* ボタンを横並びにするため */
-  align-items: stretch; /* 中身のボタンを縦に引き伸ばす */
-}
+  display: flex;
+  width: 100%;
+  justify-content: center; /* ボタンを中央に寄せる */
+  gap: 40px;
+  /* ▽ 縦幅の目安：ここを調整するとボタンの高さが変わります */
+  height: 450px; 
+  flex-grow: 0; /* 勝手に伸びすぎないように固定 */
 }
 
 .vote-half {
-  flex: 1;
-  height: 100%;      /* 親要素いっぱいに伸ばす */
-  font-size: 100px;  /* 必要に応じて調整 */
+  /* ▽ 正方形に近づけるための設定 */
+  aspect-ratio: 1 / 1; /* 縦横比を 1:1 (正方形) に指定 */
+  height: 100%;       /* 上記の height: 450px に合わせる */
+  
+  font-size: 100px;
   font-weight: 800;
   border: none;
-  border-radius: 60px; /* 目安画像に近い丸み */
+  border-radius: 50px;
   color: white;
   cursor: pointer;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
 }
 
-/* 欠席ボタンを最下部へ */
 .absent {
   width: 100%;
-  height: 180px;     /* 画像の比率に合わせて高さを確保 */
+  max-width: 940px; /* 賛成・反対ボタンの幅と合わせる（必要に応じて調整） */
+  height: 140px;
   font-size: 40px;
   font-weight: 700;
   background: var(--absent-color);
   color: white;
   border: none;
-  border-radius: 30px;
-  flex-shrink: 0;    /* 潰されないように固定 */
+  border-radius: 24px;
+  margin: 0 auto; /* 中央配置 */
 }
   
 .agree { background: linear-gradient(145deg, #ff6b6b, var(--agree-color)); }
