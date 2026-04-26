@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Rösta│v2.21.0</title>
+<title>Rösta│v2.22.0</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -77,42 +77,36 @@ body {
 }
 
 /* 投票画面 - Chromebook最適化 */
+/* レイアウトの土台 */
 #voteArea { 
-  display: flex;
-  flex-direction: column;
+  display: flex !important;
+  flex-direction: column !important;
   height: 100vh;
-  padding: 20px 40px; /* 上下の余白を少し詰めました */
+  width: 100%;
+  padding: 20px 40px; 
   box-sizing: border-box;
-  /* space-aroundからflex-start(上詰め)に変更して勝手な空白を阻止 */
-  justify-content: flex-start; 
+  justify-content: flex-start; /* 上詰めに固定して空白を排除 */
   align-items: center;
 }
 
-#progress {
-  margin-top: 10px;
-  font-size: 24px;
-}
+/* 番号表示エリア */
+#progress { font-size: 24px; color: var(--text-sub); margin-top: 10px; }
+#studentId { font-size: 110px; font-weight: 800; margin: 5px 0 15px 0; }
 
-#studentId { 
-  font-size: 110px; 
-  font-weight: 800; 
-  margin: 10px 0; /* 番号上下の隙間 */
-}
-
+/* 賛成・反対ボタン（メインエリア） */
 .vote-main {
   display: flex;
   width: 100%;
-  justify-content: center; 
-  gap: 40px;
-  height: 450px; 
-  flex-grow: 0;
-  /* ▽ 賛成・反対と欠席の間の距離。ここを小さくすると詰まります */
-  margin-bottom: 20px; 
+  justify-content: center;
+  gap: 30px;
+  height: 480px; /* ここで高さをしっかり確保 */
+  margin-bottom: 20px; /* 欠席ボタンとの距離を適切に（ここを詰めるとさらに密着） */
 }
 
 .vote-half {
-  aspect-ratio: 2 / 1; 
-  height: 60%; /* height: 450px の中での比率を上げて、より大きく */
+  /* 縦横比を調整しつつ親の高さに合わせる */
+  aspect-ratio: 1.5 / 1; 
+  height: 100%;
   font-size: 100px;
   font-weight: 800;
   border: none;
@@ -123,22 +117,32 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: transform 0.1s, filter 0.1s;
 }
 
+/* 色の復活と鮮やかさの維持 */
+.agree { background: linear-gradient(145deg, #ff6b6b, #ef4444) !important; }
+.disagree { background: linear-gradient(145deg, #60a5fa, #3b82f6) !important; }
+
+/* 欠席ボタン */
 .absent {
   width: 100%;
-  max-width: 940px; 
-  height: 140px;
+  max-width: 900px; 
+  height: 150px;
   font-size: 40px;
   font-weight: 700;
   background: var(--absent-color);
   color: white;
   border: none;
   border-radius: 24px;
-  /* margin-topを 0 にすることで、上のボタンと密着させます */
-  margin: 0 auto; 
+  margin: 0 auto;
 }
 
+/* コード入力画面の修正（ボタンが横に並ぶのを防ぐ） */
+#codeInput .qr-btn-large {
+  display: block;
+  margin: 60px auto 0;
+}
 /* ユーザーバーの表示修正 */
 #userBar {
   position: absolute;
