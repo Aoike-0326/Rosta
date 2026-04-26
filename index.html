@@ -285,20 +285,65 @@ let html5QrCode;
 let mergeQr;
 let isMerged=false;
 
-  // 音源の定義（関数の外、scriptタグの最初の方に置いてください）
+// 変数定義
+let cls="",ranges=[],role="";
+let start=1,end=0,current;
+let agree=0,disagree=0,absent=0;
+let voteCodeGlobal="";
+let votes=[];
+let html5QrCode;
+let mergeQr;
+let isMerged=false;
+
+// 1. 音源を定義（ここではまだロードを完了させない）
 const soundAgree = new Audio('1.mp3');
 const soundAbsent = new Audio('2.mp3');
 
+// 2. ブラウザの音出し制限を解除する関数
+function unlockAudio() {
+    // 空の音を再生して「このサイトは音を出しますよ」とブラウザに認識させる
+    soundAgree.play().then(() => {
+        soundAgree.pause();
+        soundAgree.currentTime = 0;
+    }).catch(e => console.log("Audio unlock wait..."));
+    
+    soundAbsent.play().then(() => {
+        soundAbsent.pause();
+        soundAbsent.currentTime = 0;
+    }).catch(e => console.log("Audio unlock wait..."));
+}
+
+// スキャン開始ボタンや役割選択ボタンの処理に unlockAudio() を仕込む
+function startQR(){
+  unlockAudio(); // ここで音を「解凍」
+  document.getElementById("qrBtn").style.display="none";
+  // ...以下、元のstartQRの処理...
+  html5QrCode=new Html5Qrcode("reader");
+  html5QrCode.start(
+    {facingMode:"environment"},
+    {fps:10,qrbox:300},
+    text=>{
+      let data=JSON.parse(text);
+      cls=data.class;
+      ranges=data.ranges;
+      html5QrCode.stop().then(() => {
+        document.getElementById("reader").style.display="none";
+        document.getElementById("setupTitle").innerText="役割を選択してください";
+        afterScan.style.display="block";
+      });
+    }
+  ).catch(()=>alert("カメラ起動失敗"));
+}
+
 function vote(type){
-  // --- 追加：音を鳴らす処理 ---
+  // 3. 再生処理
   if(type === "欠席") {
-    soundAbsent.currentTime = 0; // 連続で押しても最初から流れるようにリセット
+    soundAbsent.currentTime = 0;
     soundAbsent.play();
   } else {
     soundAgree.currentTime = 0;
     soundAgree.play();
   }
-  // -------------------------
 
   votes.push(type);
   if(type==="賛成") agree++;
