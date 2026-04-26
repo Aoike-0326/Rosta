@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Rösta│v2.23.8</title>
+<title>Rösta│v2.24.8</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -276,6 +276,15 @@ input#voteCode {
 
 <script>
 
+let cls="",ranges=[],role="";
+let start=1,end=0,current;
+let agree=0,disagree=0,absent=0;
+let voteCodeGlobal="";
+let votes=[];
+let html5QrCode;
+let mergeQr;
+let isMerged=false;
+
   // 音源の定義（関数の外、scriptタグの最初の方に置いてください）
 const soundAgree = new Audio('カーソル移動1.mp3');
 const soundAbsent = new Audio('決定ボタンを押す1.mp3');
@@ -299,14 +308,6 @@ function vote(type){
   current++;
   current > end ? showResult() : update();
 }
-let cls="",ranges=[],role="";
-let start=1,end=0,current;
-let agree=0,disagree=0,absent=0;
-let voteCodeGlobal="";
-let votes=[];
-let html5QrCode;
-let mergeQr;
-let isMerged=false;
 
 window.onload=()=>{
  let saved=localStorage.getItem("classData");
