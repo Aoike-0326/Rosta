@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Rösta│v2.22.7</title>
+<title>Rösta│v2.22.8</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -185,25 +185,30 @@ input#voteCode {
   padding: 15px 30px; border-radius: 12px; font-size: 20px; font-weight: 600;
 }
 
- /* クレジット表記のスタイル修正 */
+
+/* クレジット表記のスタイル（修正版） */
 .credit {
-  position: absolute;
-  bottom: 15px;
-  right: 20px;
+  position: fixed;   /* absolute から fixed に変更して画面に固定 */
+  bottom: 20px;      /* 下から20px */
+  right: 20px;       /* 右から20px */
   text-align: right;
-  font-size: 12px;
-  color: var(--text-sub);
-  line-height: 1.4;
-  opacity: 0.6;
-  /* ▽ この1行を必ず入れてください ▽ */
-  pointer-events: none; 
-  /* △ これで下のボタンが触れるようになります △ */
-  z-index: 100; /* 重なり順の設定 */
+  font-size: 14px;   /* 少しだけ大きくして視認性アップ */
+  color: #9ca3af;    /* var(--text-sub) 相当の色 */
+  line-height: 1.5;
+  opacity: 0.8;      /* さっきより少し濃く */
+  pointer-events: none; /* クリックを邪魔しない設定 */
+  z-index: 9999;     /* 最前面に持ってくる */
+  font-family: 'Inter', sans-serif;
 }
 </style>
 </head>
 
 <body>
+<div class="credit">
+  ©️つちやあおい<br>
+  User Interface Arranger:Gemini
+</div>
+  
 <div class="container">
 
 <div id="userBar" onclick="toggleMenu()">
@@ -264,10 +269,6 @@ input#voteCode {
     <button id="homeBtn" class="qr-btn" onclick="goHome()" style="background:#444;">③ 終了</button>
   </div>
 
-   <div class="credit">
-  ©️つちやあおい<br>
-  User Interface Arranger:Gemini
-</div>
 </div>
 </div>
 
