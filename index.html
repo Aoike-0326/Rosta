@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Rösta│v2.19.0</title>
+<title>Rösta│v2.20.0</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -77,47 +77,66 @@ body {
 }
 
 /* 投票画面 - Chromebook最適化 */
-#voteArea {
-  /* 親要素の「中央寄せ」ルールを無視させる */
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: flex-start !important; /* すべてを上に詰める */
-  padding-top: 20px !important;
-  height: 100vh !important;
+#voteArea { 
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding: 20px 40px; /* 上下の余白を少し詰めました */
+  box-sizing: border-box;
+  /* space-aroundからflex-start(上詰め)に変更して勝手な空白を阻止 */
+  justify-content: flex-start; 
+  align-items: center;
 }
 
-#studentId {
-  margin-bottom: 10px !important; /* IDの下の隙間を最小に */
+#progress {
+  margin-top: 10px;
+  font-size: 24px;
+}
+
+#studentId { 
+  font-size: 110px; 
+  font-weight: 800; 
+  margin: 10px 0; /* 番号上下の隙間 */
 }
 
 .vote-main {
-  display: flex !important;
-  justify-content: center !important;
-  align-items: stretch !important;
-  flex-grow: 0 !important; /* 勝手に広がらないようにする */
-  height: 400px;           /* ◀ボタンの高さ。ここでお好みのサイズに固定 */
-  margin-bottom: 10px !important; /* ◀【重要】これと下の欠席ボタンの距離を詰める */
+  display: flex;
+  width: 100%;
+  justify-content: center; 
+  gap: 40px;
+  height: 450px; 
+  flex-grow: 0;
+  /* ▽ 賛成・反対と欠席の間の距離。ここを小さくすると詰まります */
+  margin-bottom: 20px; 
 }
 
-.absent {
-  margin-top: 0 !important; /* 欠席ボタンの上の余白をゼロにする */
-  height: 120px;            /* 欠席ボタンの高さ */
+.vote-half {
+  aspect-ratio: 2 / 1; 
+  height: 90%; /* height: 450px の中での比率を上げて、より大きく */
+  font-size: 100px;
+  font-weight: 800;
+  border: none;
+  border-radius: 50px;
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-  
-.agree { background: linear-gradient(145deg, #ff6b6b, var(--agree-color)); }
-.disagree { background: linear-gradient(145deg, #60a5fa, var(--disagree-color)); }
-.vote-half:active { transform: scale(0.96); filter: brightness(0.8); }
 
 .absent {
   width: 100%;
-  height: 140px; /* 縦幅をアップ */
+  max-width: 940px; 
+  height: 140px;
   font-size: 40px;
   font-weight: 700;
   background: var(--absent-color);
   color: white;
   border: none;
   border-radius: 24px;
-  cursor: pointer;
+  /* margin-topを 0 にすることで、上のボタンと密着させます */
+  margin: 0 auto; 
 }
 
 /* ユーザーバーの表示修正 */
