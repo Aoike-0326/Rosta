@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Rösta│v2.17.0</title>
+<title>Rösta│v2.18.0</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -68,44 +68,54 @@ body {
   margin-bottom: 30px;
 }
 /* 投票開始ボタンの配置調整 */
+/* --- コード入力画面のボタン配置修正 --- */
 #codeInput .qr-btn-large {
-  display: block;    /* 確実に改行させる */
-  margin: 60px auto; /* 上に大きな余白を作り、左右中央に配置 */
+  display: block;    /* 確実に改行させて下へ配置 */
+  margin: 60px auto 0; 
   font-size: 32px;
   padding: 30px 100px;
   border-radius: 20px;
 }
 
-/* 投票画面 - Chromebook最適化 */
+/* --- 投票画面：Chromebook最適化と空白削減 --- */
 #voteArea { 
   display: flex;
   flex-direction: column;
   height: 100vh;
-  padding: 40px; /* 全体の余白を少し広めに */
+  padding: 20px 40px; /* 上下の余白を少し詰める */
   box-sizing: border-box;
-  justify-content:flex-start; 
+  /* 上から順に配置し、中間の空白をCSSで制御する */
+  justify-content: flex-start; 
+  align-items: center;
+}
+
+#progress {
+  font-size: 24px;
+  color: var(--text-sub);
+  margin-top: 10px;
 }
 
 #studentId { 
   font-size: 110px; 
   font-weight: 800; 
-  margin: 0;
+  margin: 10px 0; /* 番号上下の隙間を最小限に */
 }
 
 .vote-main {
   display: flex;
   width: 100%;
-  justify-content: center; /* ボタンを中央に寄せる */
-  gap: 40px;
-  /* ▽ 縦幅の目安：ここを調整するとボタンの高さが変わります */
-  height: 450px; 
-  flex-grow: 0; /* 勝手に伸びすぎないように固定 */
+  justify-content: center;
+  gap: 30px;
+  /* ▽ ここが重要：画面の余っている縦幅をボタンに割り当てる */
+  flex-grow: 1; 
+  max-height: 550px; /* 伸びすぎ防止のストッパー（お好みで調整） */
+  margin-bottom: 20px; /* 欠席ボタンとの隙間 */
 }
 
 .vote-half {
-  /* ▽ 正方形に近づけるための設定 */
-  aspect-ratio: 2 / 1; /* 縦横比を 1:1 (正方形) に指定 */
-  height: 65%;       /* 上記の height: 450px に合わせる */
+  /* ▽ 縦横比を 1.2:1 程度に（Chromebookで正方形に見える目安） */
+  aspect-ratio: 1.2 / 1; 
+  height: 100%;       /* 親のvote-mainいっぱいに縦に伸びる */
   
   font-size: 100px;
   font-weight: 800;
@@ -117,36 +127,27 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: transform 0.1s, filter 0.1s;
 }
 
 .absent {
   width: 100%;
-  max-width: 940px; /* 賛成・反対ボタンの幅と合わせる（必要に応じて調整） */
-  height: 140px;
+  max-width: 940px;
+  height: 140px; /* 欠席ボタンの大きさは維持 */
   font-size: 40px;
   font-weight: 700;
   background: var(--absent-color);
   color: white;
   border: none;
   border-radius: 24px;
-  margin: 0 auto; /* 中央配置 */
+  margin-bottom: 20px; /* 画面最下部との隙間 */
+  flex-shrink: 0;      /* 賛成・反対に押し潰されないように固定 */
 }
-  
-.agree { background: linear-gradient(145deg, #ff6b6b, var(--agree-color)); }
-.disagree { background: linear-gradient(145deg, #60a5fa, var(--disagree-color)); }
+
+/* 色設定の維持 */
+.agree { background: linear-gradient(145deg, #ff6b6b, var(--agree-color)) !important; }
+.disagree { background: linear-gradient(145deg, #60a5fa, var(--disagree-color)) !important; }
 .vote-half:active { transform: scale(0.96); filter: brightness(0.8); }
-
-.absent {
-  width: 100%;
-  height: 140px; /* 縦幅をアップ */
-  font-size: 40px;
-  font-weight: 700;
-  background: var(--absent-color);
-  color: white;
-  border: none;
-  border-radius: 24px;
-  cursor: pointer;
-}
 
 /* ユーザーバーの表示修正 */
 #userBar {
