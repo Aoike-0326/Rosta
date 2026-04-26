@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Rösta│v2.26.0</title>
+<title>Rösta│v2.22.5</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -184,6 +184,19 @@ input#voteCode {
   background: rgba(255,255,255,0.1); border: none; color: white;
   padding: 15px 30px; border-radius: 12px; font-size: 20px; font-weight: 600;
 }
+
+  /* クレジット表記のスタイル */
+.credit {
+  position: absolute;
+  bottom: 10px;
+  right: 20px;
+  text-align: right;
+  font-size: 12px;
+  color: var(--text-sub);
+  line-height: 1.4;
+  opacity: 0.6; /* 少し薄くしてメインの邪魔をしないように */
+  pointer-events: none; /* ボタン操作の邪魔をしない */
+}
 </style>
 </head>
 
@@ -323,15 +336,29 @@ function logout(){
 }
 
 function startVoting(){
- let code=voteCode.value;
- if(!code)return alert("投票コードを入力してください");
- voteCodeGlobal=code;
- if(!confirm(`${start}番から${end}番まで開始しますか？`))return;
- current=start;
- codeInput.style.display="none";
- voteArea.style.display="block";
- userBar.style.display="none";
- update();
+  let code = voteCode.value;
+  
+  // 1. 未入力チェック
+  if(!code) return alert("投票コードを入力してください");
+  
+  // 2. 許可されたコードのリスト
+  const allowedCodes = ["0248", "8931", "2410", "1012", "3261", "7214", "0000"];
+  
+  // 3. 入力されたコードがリストにあるか確認
+  if(!allowedCodes.includes(code)) {
+    alert("エラー：無効な投票コードです。正しく入力してください。");
+    voteCode.value = ""; // 入力をリセット
+    return;
+  }
+  
+  // 4. 以降、正しい場合の処理
+  voteCodeGlobal = code;
+  if(!confirm(`${start}番から${end}番まで開始しますか？`)) return;
+  current = start;
+  codeInput.style.display = "none";
+  voteArea.style.display = "block";
+  userBar.style.display = "none";
+  update();
 }
 
 function update(){
@@ -456,6 +483,11 @@ window.addEventListener("beforeunload", function (e) {
   e.preventDefault(); e.returnValue = "";
  }
 });
+
+  <div class="credit">
+  ©️つちやあおい<br>
+  User Interface Arranger:Gemini
+</div>
 </script>
 
 </body>
