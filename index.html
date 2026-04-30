@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Rösta│v2.26.8</title>
+<title>Rösta│v2.26.9</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -53,122 +53,82 @@ body {
   box-sizing: border-box;
 }
 
+/* ヘッダー・ユーザー情報 */
+#userBar {
+  position: absolute; top: 30px; left: 30px;
+  background: rgba(255,255,255,0.15); padding: 12px 25px;
+  border-radius: 12px; z-index: 1000; font-size: 18px; font-weight: 700; display: none;
+  cursor: pointer; border: 1px solid rgba(255,255,255,0.1);
+}
+
 /* セットアップ・コード入力 */
 #setup h2, #codeInput h2 { font-size: 40px; margin-bottom: 30px; }
 #reader { 
-  width: 500px !important; 
-  border-radius: 24px;
-  border: 4px solid var(--accent);
-  margin-bottom: 30px;
-}
-#codeInput .qr-btn-large {
-  display: block;
-  margin: 60px auto 0; 
-  font-size: 32px;
-  padding: 30px 100px;
-  border-radius: 20px;
+  width: 450px !important; border-radius: 24px;
+  border: 4px solid var(--accent); margin-bottom: 30px;
 }
 
-/* 投票画面 */
+/* 投票画面：Chromebook最適化 */
 #voteArea { 
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  padding: 10px 40px; 
-  box-sizing: border-box;
-  justify-content: flex-start; 
-  align-items: center;
+  display: flex; flex-direction: column; height: 100vh;
+  padding: 10px 40px; box-sizing: border-box;
+  justify-content: flex-start; align-items: center;
 }
 
-/* 学籍番号とプライバシーノートの調整 */
+#progress { font-size: 22px; font-weight: 600; color: var(--text-sub); margin-top: 15px; }
+
 #studentId { 
-  font-size: 110px; 
-  font-weight: 800; 
-  margin: 0;
-  line-height: 1.1;
+  font-size: 110px; font-weight: 800; margin: 0; line-height: 1.0; 
 }
 
 .privacy-note {
-  display: inline-block;
-  font-size: 16px;
-  color: #fbbf24;
-  background: rgba(251, 191, 36, 0.1);
-  padding: 6px 20px;
-  border-radius: 20px;
-  margin: 10px 0;
-  font-weight: 500;
+  display: inline-block; font-size: 16px; color: #fbbf24;
+  background: rgba(251, 191, 36, 0.1); padding: 6px 20px;
+  border-radius: 20px; margin: 10px 0 15px; font-weight: 500;
 }
 
-#progress { font-size: 24px; font-weight: 600; color: var(--text-sub); margin-top: 20px; }
-
 .vote-main {
-  display: flex;
-  width: 100%;
-  justify-content: center;
-  gap: 30px;
-  height: 320px; 
-  margin-bottom: 20px;
+  display: flex; width: 100%; justify-content: center;
+  gap: 25px; height: 320px; margin-bottom: 15px;
 }
 
 .vote-half {
-  aspect-ratio: 2 / 1; 
-  height: 100%; 
-  font-size: 110px;
-  font-weight: 800;
-  border: none;
-  border-radius: 60px;
-  color: white;
-  cursor: pointer;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.1s, filter 0.1s;
+  flex: 1; height: 100%; font-size: 100px; font-weight: 800;
+  border: none; border-radius: 50px; color: white; cursor: pointer;
+  box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+  display: flex; align-items: center; justify-content: center;
+  transition: transform 0.1s;
 }
-
-.absent {
-  width: 100%;
-  max-width: 1100px;
-  height: 110px;
-  font-size: 36px;
-  font-weight: 700;
-  background: var(--absent-color);
-  color: white;
-  border: none;
-  border-radius: 24px;
-  flex-shrink: 0;
-}
-
 .agree { background: linear-gradient(145deg, #ff6b6b, var(--agree-color)) !important; }
 .disagree { background: linear-gradient(145deg, #60a5fa, var(--disagree-color)) !important; }
-.vote-half:active { transform: scale(0.96); filter: brightness(0.8); }
+.vote-half:active { transform: scale(0.95); }
 
-/* ユーザーバー・クレジット */
-#userBar {
-  position: absolute; top: 30px; left: 30px;
-  background: rgba(255,255,255,0.15); padding: 15px 25px;
-  border-radius: 15px; z-index: 1000; font-size: 20px; font-weight: 700; display: none;
+.absent {
+  width: 100%; max-width: 1000px; height: 100px;
+  font-size: 32px; font-weight: 700; background: var(--absent-color);
+  color: white; border: none; border-radius: 20px; flex-shrink: 0;
 }
+
+/* クレジット */
 .credit {
-  position: fixed; bottom: 20px; right: 20px; text-align: right;
-  font-size: 14px; color: #9ca3af; line-height: 1.5; opacity: 0.8;
-  pointer-events: none; z-index: 9999; font-family: 'Inter', sans-serif;
+  position: fixed; bottom: 15px; right: 20px; text-align: right;
+  font-size: 12px; color: #6b7280; line-height: 1.4; pointer-events: none; z-index: 9999;
 }
 
-/* 共通パーツ・結果画面 */
+/* 共通ボタン・入力 */
 .qr-btn {
-  font-size: 24px; font-weight: 700; padding: 20px 50px;
+  font-size: 24px; font-weight: 700; padding: 20px 60px;
   border: none; border-radius: 15px; background: var(--accent);
   color: white; cursor: pointer;
 }
-#backBtn {
-  position: absolute; top: 30px; left: 30px; background: rgba(255,255,255,0.1);
-  border: none; color: white; padding: 15px 30px; border-radius: 12px; font-size: 20px;
-}
 input#voteCode {
-  font-size: 60px; width: 400px; text-align: center;
+  font-size: 60px; width: 350px; text-align: center;
   background: rgba(0,0,0,0.4); border: 3px solid var(--accent);
   color: white; border-radius: 20px; padding: 15px;
+}
+#backBtn {
+  position: absolute; top: 30px; left: 30px; background: rgba(255,255,255,0.1);
+  border: none; color: white; padding: 12px 25px; border-radius: 10px; font-size: 18px;
 }
 </style>
 </head>
@@ -179,8 +139,8 @@ input#voteCode {
 <div class="container">
   <div id="userBar" onclick="toggleMenu()">
     <span id="userLabel"></span>
-    <div id="dropdown" style="display:none; position:absolute; background:#222; width:100%; left:0; top:100%; border-radius:10px; margin-top:10px; border:1px solid #444;">
-      <div onclick="logout()" style="padding:20px; color:#ff4d4d;">ログアウト</div>
+    <div id="dropdown" style="display:none; position:absolute; background:#222; width:100%; left:0; top:100%; border-radius:10px; margin-top:10px; border:1px solid #444; overflow:hidden;">
+      <div onclick="logout()" style="padding:15px; color:#ff4d4d; font-size:16px;">ログアウト</div>
     </div>
   </div>
 
@@ -189,14 +149,14 @@ input#voteCode {
     <div id="reader"></div>
     <button id="qrBtn" class="qr-btn" onclick="startQR()">スキャン開始</button>
     <div id="afterScan" style="display:none;">
-      <button class="qr-btn" onclick="selectRole('child1')" style="margin-right:20px;">評議委員 A</button>
-      <button class="qr-btn" onclick="selectRole('child2')">評議委員 B</button>
+      <button class="qr-btn" onclick="selectRole('child1')" style="margin-right:20px;">評議員 A</button>
+      <button class="qr-btn" onclick="selectRole('child2')">評議員 B</button>
     </div>
   </div>
 
   <div id="codeInput" class="card" style="display:none;">
     <h2>投票コードを入力</h2>
-    <input id="voteCode" type="text" placeholder="0000">
+    <input id="voteCode" type="text" placeholder="0000" maxlength="4">
     <button class="qr-btn" onclick="startVoting()" style="margin-top:40px;">投票開始</button>
   </div>
 
@@ -214,18 +174,18 @@ input#voteCode {
   </div>
 
   <div id="resultArea" class="card" style="display:none;">
-    <h1 id="resultTitle" style="font-size:48px;">集計結果</h1>
+    <h1 id="resultTitle" style="font-size:42px; margin-bottom:30px;">集計結果</h1>
     <div style="display:flex; width:100%; justify-content:space-around; align-items:center;">
-      <div style="font-size:40px; text-align:left;">
+      <div style="font-size:36px; text-align:left; line-height:1.8;">
         賛成：<span id="agreeNum" style="color:var(--agree-color); font-weight:800;">0</span><br>
         反対：<span id="disagreeNum" style="color:var(--disagree-color); font-weight:800;">0</span><br>
         欠席：<span id="absentNum" style="font-weight:800;">0</span>
       </div>
       <div id="centerArea"></div>
-      <div style="display:flex; flex-direction:column; gap:20px;">
+      <div style="display:flex; flex-direction:column; gap:15px;">
         <button id="mergeBtn" class="qr-btn">① データ受信</button>
         <button id="sendBtn" class="qr-btn" onclick="submitData()" disabled style="background:#444;">② 生徒会に送信</button>
-        <button id="homeBtn" class="qr-btn" onclick="goHome()" style="background:#444;">③ 終了</button>
+        <button id="homeBtn" class="qr-btn" onclick="goHome()" style="background:#222;">③ 終了</button>
       </div>
     </div>
   </div>
@@ -239,24 +199,45 @@ let html5QrCode, mergeQr;
 const soundAgree = new Audio('1.mp3');
 const soundAbsent = new Audio('2.mp3');
 
+// --- 起動時処理（キャッシュ復元） ---
+window.onload = () => {
+  let saved = localStorage.getItem("classData");
+  if (saved) {
+    let d = JSON.parse(saved);
+    cls = d.cls; start = d.start; end = d.end; role = d.role;
+    document.getElementById("setup").style.display = "none";
+    document.getElementById("codeInput").style.display = "block";
+    updateUserBar();
+  }
+};
+
+// --- リロード防止ポップアップ ---
+window.addEventListener("beforeunload", (e) => {
+  const isVoting = document.getElementById("voteArea").style.display === "block";
+  if (isVoting) {
+    e.preventDefault();
+    e.returnValue = "入力中のデータが消去されます。";
+  }
+});
+
 function unlockAudio() {
-  soundAgree.play().then(()=> { soundAgree.pause(); soundAgree.currentTime=0; });
-  soundAbsent.play().then(()=> { soundAbsent.pause(); soundAbsent.currentTime=0; });
+  soundAgree.play().then(()=> { soundAgree.pause(); soundAgree.currentTime=0; }).catch(e=>console.log(e));
+  soundAbsent.play().then(()=> { soundAbsent.pause(); soundAbsent.currentTime=0; }).catch(e=>console.log(e));
 }
 
 function startQR(){
   unlockAudio();
   document.getElementById("qrBtn").style.display="none";
   html5QrCode = new Html5Qrcode("reader");
-  html5QrCode.start({facingMode:"environment"}, {fps:10, qrbox:300}, text => {
+  html5QrCode.start({facingMode:"environment"}, {fps:10, qrbox:280}, text => {
     let data = JSON.parse(text);
     cls = data.class; ranges = data.ranges;
     html5QrCode.stop().then(() => {
       document.getElementById("reader").style.display="none";
-      document.getElementById("setupTitle").innerText="役割を選択してください";
+      document.getElementById("setupTitle").innerText="役割を選択";
       document.getElementById("afterScan").style.display="block";
     });
-  }).catch(()=>alert("カメラ起動失敗"));
+  }).catch(()=>alert("カメラの起動に失敗しました。"));
 }
 
 function selectRole(r){
@@ -271,18 +252,20 @@ function selectRole(r){
 function updateUserBar(){
   let num = cls.replace("-","");
   let sId = `${num}${String(start).padStart(2,"0")}`, eId = `${num}${String(end).padStart(2,"0")}`;
-  document.getElementById("userLabel").innerText = `${role==='child1'?'A':'B'}: ${sId}~${eId}`;
+  let roleName = (role === 'child1') ? '評議員A' : '評議員B';
+  document.getElementById("userLabel").innerText = `${roleName}: ${sId} ~ ${eId}`;
   document.getElementById("userBar").style.display = "block";
 }
 
 function startVoting(){
   let code = document.getElementById("voteCode").value;
-  if(!["0248","8931","2410","1012","3261","7214","0000"].includes(code)) return alert("無効なコード");
+  if(!["0248","8931","2410","1012","3261","7214","0000"].includes(code)) return alert("無効な投票コードです。");
   voteCodeGlobal = code;
-  if(!confirm(`${start}番から${end}番まで開始？`)) return;
+  if(!confirm(`${start}番から${end}番まで投票を開始します。よろしいですか？`)) return;
   current = start;
   document.getElementById("codeInput").style.display="none";
   document.getElementById("voteArea").style.display="block";
+  document.getElementById("userBar").style.display="none"; // 投票中は隠す
   update();
 }
 
@@ -301,7 +284,7 @@ function vote(type){
 
 function goBack(){
   if(current===start) return;
-  if(!confirm("戻りますか？")) return;
+  if(!confirm("前の番号に戻りますか？")) return;
   current--; let last = votes.pop();
   if(last==="賛成") agree--; else if(last==="反対") disagree--; else absent--;
   update();
@@ -310,25 +293,26 @@ function goBack(){
 function showResult(){
   document.getElementById("voteArea").style.display="none";
   document.getElementById("resultArea").style.display="block";
+  document.getElementById("userBar").style.display="block";
   document.getElementById("agreeNum").innerText=agree;
   document.getElementById("disagreeNum").innerText=disagree;
   document.getElementById("absentNum").innerText=absent;
   let center = document.getElementById("centerArea");
   if(role==="child1"){
-    let r = document.createElement("div"); r.id="reader2"; r.style.width="350px"; r.style.height="350px";
+    let r = document.createElement("div"); r.id="reader2"; r.style.width="320px"; r.style.height="320px"; r.style.border="4px solid var(--accent)"; r.style.borderRadius="20px";
     center.appendChild(r); document.getElementById("mergeBtn").onclick = startMergeQR;
   } else {
-    let b = document.createElement("div"); b.id="qrBox"; b.style.padding="20px"; b.style.background="white";
-    center.appendChild(b); new QRCode(b, {text:`${cls}|${voteCodeGlobal}|${agree}|${disagree}|${absent}`, width:300, height:300});
+    let b = document.createElement("div"); b.id="qrBox"; b.style.padding="15px"; b.style.background="white"; b.style.borderRadius="15px";
+    center.appendChild(b); new QRCode(b, {text:`${cls}|${voteCodeGlobal}|${agree}|${disagree}|${absent}`, width:280, height:280});
     document.getElementById("mergeBtn").style.display="none"; document.getElementById("sendBtn").style.display="none";
   }
 }
 
 function startMergeQR(){
   mergeQr = new Html5Qrcode("reader2");
-  mergeQr.start({facingMode:"environment"}, {fps:10, qrbox:250}, text => {
+  mergeQr.start({facingMode:"environment"}, {fps:10, qrbox:220}, text => {
     let [c, code, a, d, ab] = text.split("|");
-    if(c!==cls || code!==voteCodeGlobal) return alert("不一致");
+    if(c!==cls || code!==voteCodeGlobal) return alert("クラスまたはコードが一致しません。");
     mergeQr.stop().then(() => {
       document.getElementById("reader2").style.display="none";
       agree+=+a; disagree+=+d; absent+=+ab; isMerged=true;
@@ -337,20 +321,22 @@ function startMergeQR(){
       document.getElementById("absentNum").innerText=absent;
       let s = document.getElementById("sendBtn"); s.disabled=false; s.style.background="var(--accent)";
       document.getElementById("mergeBtn").style.display="none";
+      alert("同期に成功しました。データを送信してください。");
     });
   });
 }
 
 function submitData(){
-  const b = document.getElementById("sendBtn"); b.disabled=true; b.innerText="送信中...";
+  const b = document.getElementById("sendBtn"); if(b.disabled) return;
+  b.disabled=true; b.innerText="送信中...";
   fetch("https://script.google.com/macros/s/AKfycbysO_2h1MkXY4s7DY4zHXJe0CddhAkCrgoS9WEZNiOgcqfx1H9sfR2I-GU6YkY8ec6C6Q/exec",{
     method:"POST", body:JSON.stringify({class:cls, code:voteCodeGlobal, agree, disagree, absent})
-  }).then(()=>{ alert("送信成功"); b.innerText="完了"; location.reload(); }).catch(()=>alert("失敗"));
+  }).then(()=>{ alert("送信に成功しました。"); b.innerText="送信完了"; }).catch(()=>alert("送信に失敗しました。"));
 }
 
-function goHome(){ if(confirm("戻りますか？")) location.reload(); }
+function goHome(){ if(confirm("初期画面に戻りますか？（データは破棄されます）")) location.reload(); }
 function toggleMenu(){ let d=document.getElementById("dropdown"); d.style.display=d.style.display==="block"?"none":"block"; }
-function logout(){ if(confirm("ログアウト？")){ localStorage.clear(); location.reload(); } }
+function logout(){ if(confirm("ログアウトしてキャッシュをクリアしますか？")){ localStorage.removeItem("classData"); location.reload(); } }
 </script>
 </body>
 </html>
