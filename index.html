@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Rösta│v2.24.7</title>
+<title>Rösta│v2.25.7</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -93,6 +93,38 @@ body {
   font-size: 110px; 
   font-weight: 800; 
   margin: 5px 0; /* 番号の上下を詰めてボタンを上げる */
+}
+
+  <div id="voteArea" class="card" style="display:none;">
+  <button id="backBtn" onclick="goBack()">← 戻る</button>
+
+  <div>
+    <div id="progress"></div>
+    <div id="studentId"></div>
+    <div class="privacy-note">個人の投票は送信されません。総計が送信されます</div>
+  </div>
+
+  <div class="vote-main">
+    ```
+
+#### 2. CSSの修正
+文字が邪魔にならない程度の大きさで、でも読みやすいスタイルを設定します。`<style>` タグの中に追加してください。
+
+```css
+.privacy-note {
+  font-size: 18px;      /* 控えめだけど読めるサイズ */
+  color: var(--text-sub); /* グレー系の色 */
+  margin-top: -10px;    /* 学籍番号に少し近づける */
+  margin-bottom: 20px;  /* ボタンとの間隔 */
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+/* 学籍番号の余白を少し調整してバランスを取る */
+#studentId {
+  font-size: 110px;
+  font-weight: 800;
+  margin: 0; /* 余白をリセット */
 }
 
 .vote-main {
