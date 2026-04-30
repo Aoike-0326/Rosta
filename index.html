@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Rösta│v2.25.7</title>
+<title>Rösta│v2.26.7</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -111,20 +111,23 @@ body {
 文字が邪魔にならない程度の大きさで、でも読みやすいスタイルを設定します。`<style>` タグの中に追加してください。
 
 ```css
+/* 安心感を伝えるメッセージのスタイル（修正版） */
 .privacy-note {
-  font-size: 18px;      /* 控えめだけど読めるサイズ */
-  color: var(--text-sub); /* グレー系の色 */
-  margin-top: -10px;    /* 学籍番号に少し近づける */
-  margin-bottom: 20px;  /* ボタンとの間隔 */
+  display: block;       /* 確実に表示 */
+  font-size: 20px;      /* 少し大きく */
+  color: #fbbf24;       /* 少し目立つ黄色（警告ではなく安心の色）に */
+  margin: 10px 0 30px;  /* 上下に適度な余白 */
   font-weight: 500;
-  opacity: 0.8;
+  text-align: center;
+  width: 100%;
 }
 
-/* 学籍番号の余白を少し調整してバランスを取る */
+/* 学籍番号の余白も少し調整 */
 #studentId {
   font-size: 110px;
   font-weight: 800;
-  margin: 0; /* 余白をリセット */
+  margin-top: 20px;
+  margin-bottom: 0;
 }
 
 .vote-main {
@@ -268,11 +271,11 @@ input#voteCode {
 </div>
 
 <div id="voteArea" class="card" style="display:none;">
-<button id="backBtn" onclick="goBack()">← 戻る</button>
+  <button id="backBtn" onclick="goBack()">← 戻る</button>
 
-<div>
-  <div id="progress"></div>
-  <div id="studentId"></div>
+  <div>
+    <div id="progress"></div>
+    <div id="studentId"></div> <div class="privacy-note">個人の投票は送信されません。総計が送信されます</div> </div>
 </div>
 
 <div class="vote-main">
