@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Rösta│v2.26.11</title>
+<title>Rösta│v2.26.12</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -362,12 +362,34 @@ function startMergeQR(){
   });
 }
 
-function submitData(){
-  const b = document.getElementById("sendBtn"); if(b.disabled) return;
-  b.disabled=true; b.innerText="送信中...";
-  fetch("https://script.google.com/macros/s/AKfycbysO_2h1MkXY4s7DY4zHXJe0CddhAkCrgoS9WEZNiOgcqfx1H9sfR2I-GU6YkY8ec6C6Q/exec",{
-    method:"POST", body:JSON.stringify({class:cls, code:voteCodeGlobal, agree, disagree, absent})
-  }).then(()=>{ alert("送信に成功しました。"); b.innerText="送信完了"; }).catch(()=>alert("送信に失敗しました。"));
+function submitData() {
+  const b = document.getElementById("sendBtn");
+  if (b.disabled && b.innerText !== "リトライ") return; // 送信中以外はガード
+
+  b.disabled = true;
+  b.innerText = "送信中...";
+  b.style.background = "#444"; // 送信中は暗くする
+
+  fetch("https://script.google.com/macros/s/AKfycbysO_2h1MkXY4s7DY4zHXJe0CddhAkCrgoS9WEZNiOgcqfx1H9sfR2I-GU6YkY8ec6C6Q/exec", {
+    method: "POST",
+    body: JSON.stringify({ class: cls, code: voteCodeGlobal, agree, disagree, absent })
+  })
+  .then(response => {
+    if (!response.ok) throw new Error('Network response was not ok');
+    alert("送信に成功しました。");
+    b.innerText = "送信完了";
+    b.style.background = "#222"; // 完了後はさらに暗く（または別の色に）
+    b.disabled = true; // 完全に無効化
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    alert("送信に失敗しました。何回も続く場合は生徒会本部役員を呼び出してください");
+    
+    // ▽ リトライできるように復活させる ▽
+    b.disabled = false;
+    b.innerText = "リトライ";
+    b.style.background = "var(--agree-color)"; // 目立つ赤色（--agree-color）に変更
+  });
 }
 
 function goHome(){ if(confirm("初期画面に戻りますか？（データは破棄されます）")) location.reload(); }
