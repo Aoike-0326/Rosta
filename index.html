@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Rösta│v2.26.13</title>
+<title>Rösta│v2.26.14</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -112,7 +112,7 @@ body {
 /* クレジット */
 .credit {
   position: fixed; bottom: 15px; right: 20px; text-align: right;
-  font-size: 12px; color: #6b7280; line-height: 1.4; pointer-events: none; z-index: 9999;
+  font-size: 18px; color: #6b7280; line-height: 1.4; pointer-events: none; z-index: 9999;
 }
 
 /* 共通ボタン・入力 */
@@ -164,8 +164,8 @@ input#voteCode {
     <div id="reader"></div>
     <button id="qrBtn" class="qr-btn" onclick="startQR()">スキャン開始</button>
     <div id="afterScan" style="display:none;">
-      <button class="qr-btn" onclick="selectRole('child1')" style="margin-right:20px;">評議員 A</button>
-      <button class="qr-btn" onclick="selectRole('child2')">評議員 B</button>
+      <button class="qr-btn" onclick="selectRole('child1')" style="margin-right:20px;">評議委員 A</button>
+      <button class="qr-btn" onclick="selectRole('child2')">評議委員 B</button>
     </div>
   </div>
 
@@ -282,7 +282,7 @@ function selectRole(r){
 function updateUserBar(){
   let num = cls.replace("-","");
   let sId = `${num}${String(start).padStart(2,"0")}`, eId = `${num}${String(end).padStart(2,"0")}`;
-  let roleName = (role === 'child1') ? '評議員A' : '評議員B';
+  let roleName = (role === 'child1') ? '評議委員A' : '評議委員B';
   document.getElementById("userLabel").innerText = `${roleName}: ${sId} ~ ${eId}`;
   document.getElementById("userBar").style.display = "block";
 }
@@ -321,7 +321,7 @@ function vote(type){
 
   if (current > end) {
     // ▽ 全員の投票が終わった瞬間にアラートを出す ▽
-    alert("投票が完了しました。評議員に渡してください。");
+    alert("投票が完了しました。評議委員に渡してください。");
     showResult();
   } else {
     update();
