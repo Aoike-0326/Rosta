@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Rösta│v2.26.10</title>
+<title>Rösta│v2.26.11</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -227,9 +227,14 @@ window.onload = () => {
 };
 
 // --- リロード防止ポップアップ ---
+// --- 修正：リロード防止ポップアップ ---
 window.addEventListener("beforeunload", (e) => {
   const isVoting = document.getElementById("voteArea").style.display === "block";
-  if (isVoting) {
+  const isResult = document.getElementById("resultArea").style.display === "block";
+  const sendBtn = document.getElementById("sendBtn");
+
+  // 投票中、または結果画面（かつ送信完了ボタンがまだ押されていない状態）で警告
+  if (isVoting || (isResult && sendBtn && sendBtn.innerText !== "送信完了")) {
     e.preventDefault();
     e.returnValue = "入力中のデータが消去されます。";
   }
@@ -290,11 +295,27 @@ function update(){
   document.getElementById("studentId").innerText = `${num}${String(current).padStart(2,"0")}`;
 }
 
+// --- 修正：投票アクション ---
 function vote(type){
-  if(type==="欠席") { soundAbsent.currentTime=0; soundAbsent.play(); absent++; }
-  else { soundAgree.currentTime=0; soundAgree.play(); type==="賛成"?agree++:disagree++; }
-  votes.push(type); current++;
-  current > end ? showResult() : update();
+  if(type==="欠席") { 
+    soundAbsent.currentTime=0; 
+    soundAbsent.play(); 
+    absent++; 
+  } else { 
+    soundAgree.currentTime=0; 
+    soundAgree.play(); 
+    type==="賛成" ? agree++ : disagree++; 
+  }
+  votes.push(type); 
+  current++;
+
+  if (current > end) {
+    // ▽ 全員の投票が終わった瞬間にアラートを出す ▽
+    alert("投票が完了しました。評議員に渡してください。");
+    showResult();
+  } else {
+    update();
+  }
 }
 
 function goBack(){
