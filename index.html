@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Rösta│v2.26.9</title>
+<title>Rösta│v2.26.10</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -121,10 +121,25 @@ body {
   border: none; border-radius: 15px; background: var(--accent);
   color: white; cursor: pointer;
 }
+/* 入力欄のスタイル（幅を少し調整） */
 input#voteCode {
-  font-size: 60px; width: 350px; text-align: center;
-  background: rgba(0,0,0,0.4); border: 3px solid var(--accent);
-  color: white; border-radius: 20px; padding: 15px;
+  font-size: 60px; 
+  width: 350px; 
+  text-align: center;
+  background: rgba(0,0,0,0.4); 
+  border: 3px solid var(--accent);
+  color: white; 
+  border-radius: 20px; 
+  padding: 15px;
+  display: block;    /* ブロック要素にして中央寄せしやすくする */
+  margin: 0 auto;    /* 中央寄せ */
+}
+
+/* 投票開始ボタンのスタイル（すぐ下に配置） */
+#startVoteBtn {
+  margin-top: 25px;  /* 入力欄との隙間を「25px」に設定 */
+  display: inline-block;
+  /* 他の .qr-btn のスタイルは継承されます */
 }
 #backBtn {
   position: absolute; top: 30px; left: 30px; background: rgba(255,255,255,0.1);
@@ -154,11 +169,11 @@ input#voteCode {
     </div>
   </div>
 
-  <div id="codeInput" class="card" style="display:none;">
-    <h2>投票コードを入力</h2>
-    <input id="voteCode" type="text" placeholder="0000" maxlength="4">
-    <button class="qr-btn" onclick="startVoting()" style="margin-top:40px;">投票開始</button>
-  </div>
+ <div id="codeInput" class="card" style="display:none;">
+  <h2>投票コードを入力</h2>
+  <input id="voteCode" type="text" placeholder="0000" maxlength="4">
+  <button class="qr-btn" onclick="startVoting()" id="startVoteBtn">投票開始</button>
+</div>
 
   <div id="voteArea" class="card" style="display:none;">
     <button id="backBtn" onclick="goBack()">← 戻る</button>
