@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Rösta│v2.26.12</title>
+<title>Rösta│v2.26.13</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -228,15 +228,25 @@ window.onload = () => {
 
 // --- リロード防止ポップアップ ---
 // --- 修正：リロード防止ポップアップ ---
+// --- 修正：リロード防止ポップアップ ---
 window.addEventListener("beforeunload", (e) => {
   const isVoting = document.getElementById("voteArea").style.display === "block";
   const isResult = document.getElementById("resultArea").style.display === "block";
   const sendBtn = document.getElementById("sendBtn");
 
-  // 投票中、または結果画面（かつ送信完了ボタンがまだ押されていない状態）で警告
-  if (isVoting || (isResult && sendBtn && sendBtn.innerText !== "送信完了")) {
+  // 評議員A（送信ボタンがある側）かつ、送信が完了していない場合のみ警告
+  // 評議員Bや、送信済みのAは警告を出さない
+  if (isVoting) {
     e.preventDefault();
     e.returnValue = "入力中のデータが消去されます。";
+    return e.returnValue;
+  }
+
+  // 評議員A限定：送信完了ボタンが表示されている間は、未送信なら警告
+  if (isResult && role === "child1" && sendBtn && sendBtn.innerText !== "送信完了") {
+    e.preventDefault();
+    e.returnValue = "送信が完了していません。データが消去されます。";
+    return e.returnValue;
   }
 });
 
@@ -392,7 +402,15 @@ function submitData() {
   });
 }
 
-function goHome(){ if(confirm("初期画面に戻りますか？（データは破棄されます）")) location.reload(); }
+// --- 修正：終了ボタンの処理 ---
+function goHome() {
+  if (confirm("初期画面に戻りますか？（データは破棄されます）")) {
+    // 意図的な遷移なので、beforeunload イベントを無効化する
+    window.onbeforeunload = null; 
+    location.reload();
+  }
+}
+  
 function toggleMenu(){ let d=document.getElementById("dropdown"); d.style.display=d.style.display==="block"?"none":"block"; }
 function logout(){ if(confirm("ログアウトしてキャッシュをクリアしますか？")){ localStorage.removeItem("classData"); location.reload(); } }
 </script>
